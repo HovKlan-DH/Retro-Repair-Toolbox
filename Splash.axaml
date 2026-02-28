@@ -1,25 +1,46 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="RRT.Splash"
-        Width="600" Height="350"
+        Width="600" Height="400"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
         CanResize="False"
         ShowInTaskbar="False"
-        Topmost="True">
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
 
-    <Grid Background="{DynamicResource AppThemeBackgroundBrush}">
+    <Border Background="{DynamicResource AppThemeBackgroundBrush}"
+            BorderBrush="Black"
+            BorderThickness="1"
+            CornerRadius="4"
+            ClipToBounds="True">
+        
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-            <TextBlock Text="My Application"
+            <Image Source="avares://Retro-Repair-Toolbox/Assets/RRT_icon.png"
+                   Width="128" Height="128" 
+                   Margin="0,0,0,8" />
+
+            <TextBlock Text="Retro Repair Toolbox"
                        FontSize="36"
+                       FontWeight="SemiBold"
                        Foreground="{DynamicResource AppThemeTextBrush}"
                        HorizontalAlignment="Center" />
+            
+            <TextBlock x:Name="VersionLabel"
+                       Text="Version 1.0.0"
+                       FontSize="12"
+                       Foreground="{DynamicResource AppThemeTextBrush}"
+                       Opacity="0.7"
+                       HorizontalAlignment="Center" 
+                       Margin="0,-4,0,16" />
+
             <TextBlock x:Name="StatusLabel"
                        Text="Loading, please wait..."
                        FontSize="14"
                        Foreground="{DynamicResource AppThemeTextBrush}"
-                       HorizontalAlignment="Center"
-                       Margin="0,12,0,0" />
+                       HorizontalAlignment="Center" />
+            
             <TextBlock x:Name="FileLabel"
                        Text=""
                        FontSize="12"
@@ -30,6 +51,6 @@
                        TextTrimming="CharacterEllipsis"
                        IsVisible="False" />
         </StackPanel>
-    </Grid>
+    </Border>
 
 </Window>

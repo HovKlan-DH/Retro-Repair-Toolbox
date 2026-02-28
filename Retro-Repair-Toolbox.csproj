@@ -70,11 +70,11 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Assets\RRT_icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+	    <AvaloniaResource Update="Assets\RRT_icon.png">
+		    <Pack>True</Pack>
+		    <PackagePath>\</PackagePath>
+	    </AvaloniaResource>
+    </ItemGroup>
 
 </Project>

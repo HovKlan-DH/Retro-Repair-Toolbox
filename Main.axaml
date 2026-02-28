@@ -505,22 +505,88 @@
                     </TabItem>
 
                     <TabItem Header="About">
-                        <StackPanel Spacing="12"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    MaxWidth="360">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                            <TextBlock Text="Retro Repair Toolbox"
-                                       FontSize="16"
-                                       FontWeight="SemiBold"
-                                       HorizontalAlignment="Center" />
+                            <StackPanel Grid.Row="0"
+                                        Orientation="Horizontal"
+                                        Spacing="16"
+                                        VerticalAlignment="Center">
+                            
+                                <Image Source="avares://Retro-Repair-Toolbox/Assets/RRT_icon.png"
+                                       Width="96"
+                                       Height="96" />
+                            
+                                <StackPanel VerticalAlignment="Center"
+                                            Spacing="4">
+                                    <TextBlock x:Name="AboutAssemblyTitleText"
+                                               FontSize="24"
+                                               FontWeight="SemiBold" />
+                                           
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="0">
+                                        <TextBlock Text="Version "
+                                                   FontSize="14" />
+                                        <TextBlock x:Name="AppVersionText"
+                                                   FontSize="14"
+                                                   FontWeight="Bold" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
 
-                            <TextBlock x:Name="AppVersionText"
-                                       FontSize="11"
-                                       Foreground="Gray"
-                                       HorizontalAlignment="Center" />
+                            <StackPanel Grid.Row="1"
+                                        Orientation="Horizontal"
+                                        Margin="0,32,0,0"
+                                        Spacing="6">
+                                <TextBlock Text="GitHub project page:"
+                                           VerticalAlignment="Center" />
+                                <Button Content="https://github.com/HovKlan-DH/Retro-Repair-Toolbox"
+                                        Padding="0"
+                                        BorderThickness="0"
+                                        Background="Transparent"
+                                        Foreground="{DynamicResource AppThemeAccentBrush}"
+                                        Click="OnGitHubProjectPageClick" />
+                            </StackPanel>
 
-                        </StackPanel>
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        Margin="0,6,0,26"
+                                        Spacing="6">
+                                <TextBlock Text="Helper page:"
+                                           VerticalAlignment="Center" />
+                                <Button Content="https://retro-repair-toolbox.dk"
+                                        Padding="0"
+                                        BorderThickness="0"
+                                        Background="Transparent"
+                                        Foreground="{DynamicResource AppThemeAccentBrush}"
+                                        Click="OnHelperPageClick" />
+                            </StackPanel>
+
+                            <Grid Grid.Row="3"
+                                  VerticalAlignment="Stretch"
+                                  HorizontalAlignment="Stretch"
+                                  RowDefinitions="Auto,*">
+                                <TextBlock Grid.Row="0"
+                                           Text="Changelog:"
+                                           Margin="0,0,0,6" />
+                                <TextBox x:Name="ChangelogTextBox"
+                                         Grid.Row="1"
+                                         IsReadOnly="True"
+                                         AcceptsReturn="True"
+                                         TextWrapping="NoWrap"
+                                         FontFamily="Consolas, Courier New, monospace"
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Stretch"
+                                         MinHeight="120"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+                            </Grid>
+                        </Grid>
                     </TabItem>
 
                 </TabControl>

@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System;
@@ -131,7 +132,8 @@ namespace RRT
             this.ComponentFilterListBox.SelectionChanged += this.OnComponentFilterSelectionChanged;
             this.PopulateHardwareDropDown();
 
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var assembly = Assembly.GetExecutingAssembly();
+            var version = assembly.GetName().Version;
             var versionString = version != null
                 ? $"{version.Major}.{version.Minor}.{version.Build}"
                 : null;
@@ -139,6 +141,8 @@ namespace RRT
             this.AppVersionText.Text = versionString != null
                 ? $"Version {versionString}"
                 : "Version (unknown)";
+
+            this.PopulateAboutTab(assembly, versionString);
 
             this.Title = versionString != null
                 ? $"Retro Repair Toolbox {versionString}"
@@ -1376,6 +1380,82 @@ namespace RRT
             {
                 Logger.Warning($"Failed to open app data folder - [{directory}] - [{ex.Message}]");
             }
+        }
+
+        // ###########################################################################################
+        // Populates About tab fields and loads changelog content from embedded assets.
+        // ###########################################################################################
+        private void PopulateAboutTab(Assembly assembly, string? versionString)
+        {
+            this.AboutAssemblyTitleText.Text = this.GetAssemblyTitle(assembly);
+            this.AppVersionText.Text = versionString ?? "(unknown)";
+            this.ChangelogTextBox.Text = this.LoadTextAsset("Assets/Changelog.txt");
+        }
+
+        // ###########################################################################################
+        // Resolves assembly title from metadata, with a fallback to assembly name.
+        // ###########################################################################################
+        private string GetAssemblyTitle(Assembly assembly)
+        {
+            var titleAttribute = assembly.GetCustomAttribute<AssemblyTitleAttribute>();
+            if (!string.IsNullOrWhiteSpace(titleAttribute?.Title))
+                return titleAttribute.Title;
+
+            return assembly.GetName().Name ?? "Retro Repair Toolbox";
+        }
+
+        // ###########################################################################################
+        // Loads a text asset from Avalonia resources and returns the raw file content.
+        // ###########################################################################################
+        private string LoadTextAsset(string assetPath)
+        {
+            try
+            {
+                var assetUri = new Uri($"avares://Retro-Repair-Toolbox/{assetPath}");
+                using var stream = AssetLoader.Open(assetUri);
+                using var reader = new StreamReader(stream);
+                return reader.ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                Logger.Warning($"Failed to load text asset - [{assetPath}] - [{ex.Message}]");
+                return "Unable to load changelog.";
+            }
+        }
+
+        // ###########################################################################################
+        // Opens the configured URL in the system default browser.
+        // ###########################################################################################
+        private void OpenUrl(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Warning($"Failed to open URL - [{url}] - [{ex.Message}]");
+            }
+        }
+
+        // ###########################################################################################
+        // Opens the GitHub project page from the About tab.
+        // ###########################################################################################
+        private void OnGitHubProjectPageClick(object? sender, RoutedEventArgs e)
+        {
+            this.OpenUrl("https://github.com/HovKlan-DH/Retro-Repair-Toolbox");
+        }
+
+        // ###########################################################################################
+        // Opens the helper page from the About tab.
+        // ###########################################################################################
+        private void OnHelperPageClick(object? sender, RoutedEventArgs e)
+        {
+            this.OpenUrl("https://retro-repair-toolbox.dk");
         }
 
     }
