@@ -6,7 +6,7 @@ Will be updated in the coming days ...
 
 - .NET 10, https://dotnet.microsoft.com/en-us/download/dotnet/10.0
 - 64-bit operating system:
-  - **Windows** 10 build 1607 or newer
+  - **Windows** 10 build 1607 or newer ( can it run on older versions with .NET 10???)
   - **macOS** 14 (Sonoma) or newer
   - **Linux**:
     - glibc 2.17+
