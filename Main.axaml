@@ -74,6 +74,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Size label -->
@@ -211,6 +212,57 @@
                     </ListBox.Styles>
                 </ListBox>
             </Grid>
+
+            <!-- Action Controls -->
+            <StackPanel Grid.Row="2" Margin="0,12,0,0" Spacing="4">
+                <!-- Selection Actions -->
+                <Grid ColumnDefinitions="*,4,*">
+                    <Button Grid.Column="0" 
+                            Content="Clear" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            FontSize="12"
+                            Padding="4" />
+                    <Button Grid.Column="2" 
+                            Content="Mark all" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            FontSize="12"
+                            Padding="4" />
+                </Grid>
+
+                <!-- Video standard -->
+                <Grid ColumnDefinitions="*,4,*">
+                    <Button Grid.Column="0" 
+                            Content="PAL" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            FontSize="12"
+                            Padding="4" />
+                    <Button Grid.Column="2" 
+                            Content="NTSC" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            FontSize="12"
+                            Padding="4" />
+                </Grid>
+
+                <!-- View options -->
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <Button Grid.Column="0"
+                            Content="Fullscreen" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            FontSize="12"
+                            Padding="4" />
+
+                    <CheckBox Grid.Column="2"
+                              Content="Blink selected" 
+                              FontSize="12"
+                              Padding="4,0,0,0"
+                              VerticalAlignment="Center" />
+                </Grid>
+            </StackPanel>
 
         </Grid>
     </Border>
