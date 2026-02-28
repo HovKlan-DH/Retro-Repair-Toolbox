@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,6 +23,9 @@ namespace RRT
         [JsonPropertyName("leftPanelWidth")] public double LeftPanelWidth { get; set; } = 200.0;
         [JsonPropertyName("schematicsSplitterRatios")] public Dictionary<string, double> SchematicsSplitterRatios { get; set; } = new();
         [JsonPropertyName("selectedCategoriesByBoard")] public Dictionary<string, List<string>> SelectedCategoriesByBoard { get; set; } = new();
+        [JsonPropertyName("lastHardware")] public string LastHardware { get; set; } = string.Empty;
+        [JsonPropertyName("lastBoardByHardware")] public Dictionary<string, string> LastBoardByHardware { get; set; } = new();
+        [JsonPropertyName("lastSchematicByBoard")] public Dictionary<string, string> LastSchematicByBoard { get; set; } = new();
         [JsonPropertyName("region")] public string Region { get; set; } = "PAL";
         [JsonPropertyName("themeVariant")] public string ThemeVariant { get; set; } = "Default";
         [JsonPropertyName("hasWindowPlacement")] public bool HasWindowPlacement { get; set; } = false;
@@ -220,5 +224,88 @@ namespace RRT
                 Logger.Warning($"Failed to save settings - [{ex.Message}]");
             }
         }
+
+        // ###########################################################################################
+        // Returns the last selected hardware name, or empty when none has been saved.
+        // ###########################################################################################
+        public static string GetLastHardware()
+            => _data.LastHardware ?? string.Empty;
+
+        // ###########################################################################################
+        // Persists the last selected hardware name.
+        // ###########################################################################################
+        public static void SetLastHardware(string hardwareName)
+        {
+            if (string.IsNullOrWhiteSpace(hardwareName))
+                return;
+
+            _data.LastHardware = hardwareName;
+            Logger.Info($"Setting changed - [LastHardware] [{hardwareName}]");
+            Save();
+        }
+
+        // ###########################################################################################
+        // Returns the saved last board for a hardware, or null when not found.
+        // ###########################################################################################
+        public static string? GetLastBoardForHardware(string hardwareName)
+        {
+            if (string.IsNullOrWhiteSpace(hardwareName))
+                return null;
+
+            var match = _data.LastBoardByHardware.FirstOrDefault(kvp =>
+                string.Equals(kvp.Key, hardwareName, StringComparison.OrdinalIgnoreCase));
+
+            return string.IsNullOrEmpty(match.Key) ? null : match.Value;
+        }
+
+        // ###########################################################################################
+        // Persists the last selected board for a specific hardware.
+        // ###########################################################################################
+        public static void SetLastBoardForHardware(string hardwareName, string boardName)
+        {
+            if (string.IsNullOrWhiteSpace(hardwareName) || string.IsNullOrWhiteSpace(boardName))
+                return;
+
+            var existingKey = _data.LastBoardByHardware.Keys.FirstOrDefault(k =>
+                string.Equals(k, hardwareName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(existingKey) &&
+                !string.Equals(existingKey, hardwareName, StringComparison.Ordinal))
+            {
+                _data.LastBoardByHardware.Remove(existingKey);
+            }
+
+            _data.LastBoardByHardware[hardwareName] = boardName;
+            Logger.Info($"Setting changed - [LastBoardByHardware] [{hardwareName}] [{boardName}]");
+            Save();
+        }
+
+        // ###########################################################################################
+        // Returns the saved last schematic name for a board key, or null when not found.
+        // ###########################################################################################
+        public static string? GetLastSchematicForBoard(string boardKey)
+        {
+            if (string.IsNullOrWhiteSpace(boardKey))
+                return null;
+
+            return _data.LastSchematicByBoard.TryGetValue(boardKey, out var schematic)
+                ? schematic
+                : null;
+        }
+
+        // ###########################################################################################
+        // Persists the last selected schematic name for a board key.
+        // ###########################################################################################
+        public static void SetLastSchematicForBoard(string boardKey, string schematicName)
+        {
+            if (string.IsNullOrWhiteSpace(boardKey) || string.IsNullOrWhiteSpace(schematicName))
+                return;
+
+            _data.LastSchematicByBoard[boardKey] = schematicName;
+            Logger.Info($"Setting changed - [LastSchematicByBoard] [{boardKey}] [{schematicName}]");
+            Save();
+        }
+
+
     }
 }

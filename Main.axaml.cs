@@ -272,8 +272,8 @@ namespace RRT
         }
 
         // ###########################################################################################
-        // Populates the hardware drop-down with distinct, sorted hardware names from loaded data.
-        // Automatically selects the first entry and triggers the board drop-down to populate.
+        // Populates the hardware drop-down with distinct hardware names from loaded data.
+        // Restores the last selected hardware if available.
         // ###########################################################################################
         private void PopulateHardwareDropDown()
         {
@@ -284,12 +284,22 @@ namespace RRT
 
             this.HardwareComboBox.ItemsSource = hardwareNames;
 
-            if (hardwareNames.Count > 0)
-                this.HardwareComboBox.SelectedIndex = 0;
+            if (hardwareNames.Count == 0)
+            {
+                this.HardwareComboBox.SelectedIndex = -1;
+                return;
+            }
+
+            var lastHardware = UserSettings.GetLastHardware();
+            var savedIndex = hardwareNames.FindIndex(h =>
+                string.Equals(h, lastHardware, StringComparison.OrdinalIgnoreCase));
+
+            this.HardwareComboBox.SelectedIndex = savedIndex >= 0 ? savedIndex : 0;
         }
 
         // ###########################################################################################
         // Filters the board drop-down to only show boards belonging to the selected hardware.
+        // Restores the last selected board for that hardware if available.
         // ###########################################################################################
         private void OnHardwareSelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
@@ -302,7 +312,20 @@ namespace RRT
                 .ToList();
 
             this.BoardComboBox.ItemsSource = boards;
-            this.BoardComboBox.SelectedIndex = boards.Count > 0 ? 0 : -1;
+
+            if (string.IsNullOrWhiteSpace(selectedHardware) || boards.Count == 0)
+            {
+                this.BoardComboBox.SelectedIndex = -1;
+                return;
+            }
+
+            UserSettings.SetLastHardware(selectedHardware);
+
+            var lastBoard = UserSettings.GetLastBoardForHardware(selectedHardware);
+            var savedIndex = boards.FindIndex(b =>
+                string.Equals(b, lastBoard, StringComparison.OrdinalIgnoreCase));
+
+            this.BoardComboBox.SelectedIndex = savedIndex >= 0 ? savedIndex : 0;
         }
 
         // ###########################################################################################
@@ -340,9 +363,12 @@ namespace RRT
             if (string.IsNullOrEmpty(selectedHardware) || string.IsNullOrEmpty(selectedBoard))
                 return;
 
-            var entry = DataManager.HardwareBoards.FirstOrDefault(e =>
-                string.Equals(e.HardwareName, selectedHardware, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(e.BoardName, selectedBoard, StringComparison.OrdinalIgnoreCase));
+            UserSettings.SetLastHardware(selectedHardware);
+            UserSettings.SetLastBoardForHardware(selectedHardware, selectedBoard);
+
+            var entry = DataManager.HardwareBoards.FirstOrDefault(ent =>
+                string.Equals(ent.HardwareName, selectedHardware, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ent.BoardName, selectedBoard, StringComparison.OrdinalIgnoreCase));
 
             if (entry == null || string.IsNullOrWhiteSpace(entry.ExcelDataFile))
                 return;
@@ -445,7 +471,14 @@ namespace RRT
             this.SchematicsThumbnailList.ItemsSource = thumbnails;
 
             if (thumbnails.Count > 0)
-                this.SchematicsThumbnailList.SelectedIndex = 0;
+            {
+                // Restore previously selected schematic for this board, fallback to 0
+                var savedSchematic = UserSettings.GetLastSchematicForBoard(boardKey);
+                var savedIndex = string.IsNullOrEmpty(savedSchematic) ? -1 : thumbnails.FindIndex(t =>
+                    string.Equals(t.Name, savedSchematic, StringComparison.OrdinalIgnoreCase));
+
+                this.SchematicsThumbnailList.SelectedIndex = savedIndex >= 0 ? savedIndex : 0;
+            }
 
             // Restore schematics splitter ratio saved for this specific board
             var ratio = UserSettings.GetSchematicsSplitterRatio(boardKey);
@@ -475,6 +508,13 @@ namespace RRT
 
             if (selected == null || string.IsNullOrEmpty(selected.ImageFilePath))
                 return;
+
+            // Save the newly selected schematic for this board
+            var boardKey = this.GetCurrentBoardKey();
+            if (!string.IsNullOrEmpty(boardKey))
+            {
+                UserSettings.SetLastSchematicForBoard(boardKey, selected.Name);
+            }
 
             var bitmap = await Task.Run(() =>
             {
@@ -1034,10 +1074,10 @@ namespace RRT
 
             if (this._currentBoardData != null)
             {
-                // Capture selected board labels before the list is rebuilt
-                var previouslySelectedLabels = new HashSet<string>(
+                // Capture selected component keys before the list is rebuilt
+                var previouslySelectedKeys = new HashSet<string>(
                     this.ComponentFilterListBox.SelectedItems?.Cast<ComponentListItem>()
-                        .Select(i => i.BoardLabel) ?? [],
+                        .Select(i => i.SelectionKey) ?? [],
                     StringComparer.OrdinalIgnoreCase);
 
                 var categoryFilter = new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
@@ -1047,17 +1087,17 @@ namespace RRT
                 this._suppressComponentHighlightUpdate = true;
                 this.ComponentFilterListBox.ItemsSource = componentItems;
 
-                // Re-select items that were selected before and are still present in the new list
+                // Re-select only exact surviving rows
                 for (int i = 0; i < componentItems.Count; i++)
                 {
-                    if (previouslySelectedLabels.Contains(componentItems[i].BoardLabel))
+                    if (previouslySelectedKeys.Contains(componentItems[i].SelectionKey))
                         this.ComponentFilterListBox.Selection.Select(i);
                 }
                 this._suppressComponentHighlightUpdate = false;
 
-                // Drive a single highlight update with only the surviving selected labels
+                // Drive a single highlight update with only the surviving selected rows
                 var survivingLabels = componentItems
-                    .Where(item => previouslySelectedLabels.Contains(item.BoardLabel))
+                    .Where(item => previouslySelectedKeys.Contains(item.SelectionKey))
                     .Select(item => item.BoardLabel)
                     .Where(l => !string.IsNullOrEmpty(l))
                     .ToList();
@@ -1263,56 +1303,6 @@ namespace RRT
         // from the non-empty parts: BoardLabel | FriendlyName | TechnicalNameOrValue.
         // Components with an empty Region column are always included regardless of the active region.
         // ###########################################################################################
-        private static List<ComponentListItem> BuildComponentItems(BoardData boardData, string region)
-        {
-            var items = new List<ComponentListItem>();
-
-            foreach (var component in boardData.Components)
-            {
-                var componentRegion = component.Region?.Trim() ?? string.Empty;
-
-                if (!string.IsNullOrEmpty(componentRegion) &&
-                    !string.Equals(componentRegion, region, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                var parts = new List<string>(3);
-                if (!string.IsNullOrWhiteSpace(component.BoardLabel))
-                    parts.Add(component.BoardLabel.Trim());
-                if (!string.IsNullOrWhiteSpace(component.FriendlyName))
-                    parts.Add(component.FriendlyName.Trim());
-                if (!string.IsNullOrWhiteSpace(component.TechnicalNameOrValue))
-                    parts.Add(component.TechnicalNameOrValue.Trim());
-
-                if (parts.Count == 0)
-                    continue;
-
-                items.Add(new ComponentListItem
-                {
-                    BoardLabel = component.BoardLabel?.Trim() ?? string.Empty,
-                    DisplayText = string.Join(" | ", parts)
-                });
-            }
-
-            return items;
-        }
-
-        // ###########################################################################################
-        // Lightweight view model for a component list item — carries the board label for
-        // highlight lookups alongside the display text shown in the UI.
-        // ###########################################################################################
-        private sealed class ComponentListItem
-        {
-            public string DisplayText { get; init; } = string.Empty;
-            public string BoardLabel { get; init; } = string.Empty;
-            public override string ToString() => this.DisplayText;
-        }
-
-        // ###########################################################################################
-        // Builds component list items filtered by the given region.
-        // Each item carries the board label for highlight lookups and a display text assembled
-        // from the non-empty parts: BoardLabel | FriendlyName | TechnicalNameOrValue.
-        // Components with an empty Region column are always included regardless of the active region.
-        // ###########################################################################################
         private static List<ComponentListItem> BuildComponentItems(BoardData boardData, string region, HashSet<string>? categoryFilter = null)
         {
             var items = new List<ComponentListItem>();
@@ -1342,7 +1332,68 @@ namespace RRT
                 items.Add(new ComponentListItem
                 {
                     BoardLabel = component.BoardLabel?.Trim() ?? string.Empty,
-                    DisplayText = string.Join(" | ", parts)
+                    DisplayText = string.Join(" | ", parts),
+                    SelectionKey = string.Join("\u001F",
+                        component.BoardLabel?.Trim() ?? string.Empty,
+                        component.FriendlyName?.Trim() ?? string.Empty,
+                        component.TechnicalNameOrValue?.Trim() ?? string.Empty,
+                        component.Region?.Trim() ?? string.Empty)
+                });
+            }
+
+            return items;
+        }
+
+        // ###########################################################################################
+        // Lightweight view model for a component list item — carries the board label for
+        // highlight lookups alongside the display text shown in the UI.
+        // ###########################################################################################
+        private sealed class ComponentListItem
+        {
+            public string DisplayText { get; init; } = string.Empty;
+            public string BoardLabel { get; init; } = string.Empty;
+            public string SelectionKey { get; init; } = string.Empty;
+            public override string ToString() => this.DisplayText;
+        }
+
+        // ###########################################################################################
+        // Builds component list items filtered by the given region.
+        // Each item carries the board label for highlight lookups and a display text assembled
+        // from the non-empty parts: BoardLabel | FriendlyName | TechnicalNameOrValue.
+        // Components with an empty Region column are always included regardless of the active region.
+        // ###########################################################################################
+        private static List<ComponentListItem> BuildComponentItems(BoardData boardData, string region)
+        {
+            var items = new List<ComponentListItem>();
+
+            foreach (var component in boardData.Components)
+            {
+                var componentRegion = component.Region?.Trim() ?? string.Empty;
+
+                if (!string.IsNullOrEmpty(componentRegion) &&
+                    !string.Equals(componentRegion, region, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var parts = new List<string>(3);
+                if (!string.IsNullOrWhiteSpace(component.BoardLabel))
+                    parts.Add(component.BoardLabel.Trim());
+                if (!string.IsNullOrWhiteSpace(component.FriendlyName))
+                    parts.Add(component.FriendlyName.Trim());
+                if (!string.IsNullOrWhiteSpace(component.TechnicalNameOrValue))
+                    parts.Add(component.TechnicalNameOrValue.Trim());
+
+                if (parts.Count == 0)
+                    continue;
+
+                items.Add(new ComponentListItem
+                {
+                    BoardLabel = component.BoardLabel?.Trim() ?? string.Empty,
+                    DisplayText = string.Join(" | ", parts),
+                    SelectionKey = string.Join("\u001F",
+                        component.BoardLabel?.Trim() ?? string.Empty,
+                        component.FriendlyName?.Trim() ?? string.Empty,
+                        component.TechnicalNameOrValue?.Trim() ?? string.Empty,
+                        component.Region?.Trim() ?? string.Empty)
                 });
             }
 
@@ -1521,10 +1572,10 @@ namespace RRT
             this._highlightRectsBySchematicAndLabel = await Task.Run(() =>
                 BuildHighlightRects(this._currentBoardData, UserSettings.Region));
 
-            // Snapshot previously selected labels
-            var previouslySelectedLabels = new HashSet<string>(
+            // Snapshot previously selected component keys
+            var previouslySelectedKeys = new HashSet<string>(
                 this.ComponentFilterListBox.SelectedItems?.Cast<ComponentListItem>()
-                    .Select(i => i.BoardLabel) ?? [],
+                    .Select(i => i.SelectionKey) ?? [],
                 StringComparer.OrdinalIgnoreCase);
 
             var activeCategories = new HashSet<string>(
@@ -1538,18 +1589,20 @@ namespace RRT
 
             for (int i = 0; i < componentItems.Count; i++)
             {
-                if (previouslySelectedLabels.Contains(componentItems[i].BoardLabel))
+                if (previouslySelectedKeys.Contains(componentItems[i].SelectionKey))
                     this.ComponentFilterListBox.Selection.Select(i);
             }
             this._suppressComponentHighlightUpdate = false;
 
             var survivingLabels = componentItems
-                .Where(item => previouslySelectedLabels.Contains(item.BoardLabel))
+                .Where(item => previouslySelectedKeys.Contains(item.SelectionKey))
                 .Select(item => item.BoardLabel)
                 .Where(l => !string.IsNullOrEmpty(l))
                 .ToList();
 
             this.UpdateHighlightsForComponents(survivingLabels);
         }
+
+
     }
 }

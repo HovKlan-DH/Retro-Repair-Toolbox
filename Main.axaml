@@ -56,10 +56,9 @@
         </Style>
 
         <!-- Region toggle buttons -->
-        <Style Selector="Button.RegionToggle /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderBrush" Value="{DynamicResource AppThemeBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+        <Style Selector="Button.RegionToggle.active">
+            <Setter Property="BorderBrush" Value="IndianRed" />
+            <Setter Property="BorderThickness" Value="2" />
         </Style>
 
         <Style Selector="Button.RegionToggle.active /template/ ContentPresenter">
