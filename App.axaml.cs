@@ -84,10 +84,6 @@ namespace RRT
 
         // ===== Schematics Viewer ==================================================================
 
-        // Default board region filter applied to component highlights.
-        // Used by: Main.OnBoardSelectionChanged, Main.CreateHighlightIndices
-        public const string DefaultRegion = "PAL";
-
         // Zoom multiplier applied per mouse wheel step.
         // Used by: Main.OnSchematicsZoom
         public const double SchematicsZoomFactor = 1.5;

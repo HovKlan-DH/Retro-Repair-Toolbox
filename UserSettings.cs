@@ -22,6 +22,7 @@ namespace RRT
         [JsonPropertyName("leftPanelWidth")] public double LeftPanelWidth { get; set; } = 200.0;
         [JsonPropertyName("schematicsSplitterRatios")] public Dictionary<string, double> SchematicsSplitterRatios { get; set; } = new();
         [JsonPropertyName("selectedCategoriesByBoard")] public Dictionary<string, List<string>> SelectedCategoriesByBoard { get; set; } = new();
+        [JsonPropertyName("region")] public string Region { get; set; } = "PAL";
         [JsonPropertyName("themeVariant")] public string ThemeVariant { get; set; } = "Default";
         [JsonPropertyName("hasWindowPlacement")] public bool HasWindowPlacement { get; set; } = false;
         [JsonPropertyName("windowState")] public string WindowState { get; set; } = "Normal";
@@ -86,6 +87,17 @@ namespace RRT
             {
                 _data.ThemeVariant = value;
                 Logger.Info($"Setting changed - [ThemeVariant] [{value}]");
+                Save();
+            }
+        }
+
+        public static string Region
+        {
+            get => _data.Region;
+            set
+            {
+                _data.Region = value;
+                Logger.Info($"Setting changed - [Region] [{value}]");
                 Save();
             }
         }

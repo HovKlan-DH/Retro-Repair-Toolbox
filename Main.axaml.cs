@@ -125,6 +125,7 @@ namespace RRT
             };
 
             this.SubscribePanelSizeChanges();
+            this.UpdateRegionButtonsState();
             this.HardwareComboBox.SelectionChanged += this.OnHardwareSelectionChanged;
             this.BoardComboBox.SelectionChanged += this.OnBoardSelectionChanged;
             this.SchematicsThumbnailList.SelectionChanged += this.OnSchematicsThumbnailSelectionChanged;
@@ -379,11 +380,11 @@ namespace RRT
             var activeCategories = new HashSet<string>(
                 this.CategoryFilterListBox.SelectedItems?.Cast<string>() ?? [],
                 StringComparer.OrdinalIgnoreCase);
-            var componentItems = BuildComponentItems(boardData, AppConfig.DefaultRegion, activeCategories);
+            var componentItems = BuildComponentItems(boardData, UserSettings.Region, activeCategories);
             this.ComponentFilterListBox.ItemsSource = componentItems;
 
             // Build per-schematic, per-label highlight rects for selection-driven highlighting
-            this._highlightRectsBySchematicAndLabel = await Task.Run(() => BuildHighlightRects(boardData, AppConfig.DefaultRegion));
+            this._highlightRectsBySchematicAndLabel = await Task.Run(() => BuildHighlightRects(boardData, UserSettings.Region));
             this._schematicByName = boardData.Schematics
                 .Where(s => !string.IsNullOrWhiteSpace(s.SchematicName))
                 .ToDictionary(s => s.SchematicName, s => s, StringComparer.OrdinalIgnoreCase);
@@ -1040,7 +1041,7 @@ namespace RRT
                     StringComparer.OrdinalIgnoreCase);
 
                 var categoryFilter = new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
-                var componentItems = BuildComponentItems(this._currentBoardData, AppConfig.DefaultRegion, categoryFilter);
+                var componentItems = BuildComponentItems(this._currentBoardData, UserSettings.Region, categoryFilter);
 
                 // Suppress highlight updates during ItemsSource replacement and re-selection
                 this._suppressComponentHighlightUpdate = true;
@@ -1458,5 +1459,105 @@ namespace RRT
             this.OpenUrl("https://retro-repair-toolbox.dk");
         }
 
+        // ###########################################################################################
+        // Clears all currently selected items in the Component filter list box.
+        // ###########################################################################################
+        private void OnClearComponentsClick(object? sender, RoutedEventArgs e)
+        {
+            this.ComponentFilterListBox.SelectedItems?.Clear();
+        }
+
+        // ###########################################################################################
+        // Selects all available items currently populated within the Component filter list box.
+        // ###########################################################################################
+        private void OnMarkAllComponentsClick(object? sender, RoutedEventArgs e)
+        {
+            this.ComponentFilterListBox.SelectAll();
+        }
+
+        // ###########################################################################################
+        // Updates the PAL/NTSC buttons' background to reflect the currently active region selection.
+        // ###########################################################################################
+        private void UpdateRegionButtonsState()
+        {
+            var activeBrush = this.FindResource("AppThemeListSelectionBrush") as IBrush;
+
+            if (string.Equals(UserSettings.Region, "PAL", StringComparison.OrdinalIgnoreCase))
+            {
+                this.PalRegionButton.Background = activeBrush;
+                this.NtscRegionButton.Background = null;
+            }
+            else
+            {
+                this.PalRegionButton.Background = null;
+                this.NtscRegionButton.Background = activeBrush;
+            }
+        }
+
+        // ###########################################################################################
+        // Switches to PAL, updates visually, and synchronously adjusts the filter items and view.
+        // ###########################################################################################
+        private void OnPalRegionClick(object? sender, RoutedEventArgs e)
+        {
+            if (string.Equals(UserSettings.Region, "PAL", StringComparison.OrdinalIgnoreCase)) return;
+            UserSettings.Region = "PAL";
+            this.UpdateRegionButtonsState();
+            _ = this.ApplyRegionFilterAsync();
+        }
+
+        // ###########################################################################################
+        // Switches to NTSC, updates visually, and synchronously adjusts the filter items and view.
+        // ###########################################################################################
+        private void OnNtscRegionClick(object? sender, RoutedEventArgs e)
+        {
+            if (string.Equals(UserSettings.Region, "NTSC", StringComparison.OrdinalIgnoreCase)) return;
+            UserSettings.Region = "NTSC";
+            this.UpdateRegionButtonsState();
+            _ = this.ApplyRegionFilterAsync();
+        }
+
+        // ###########################################################################################
+        // Refresh the component list according to the active region while recovering any matching
+        // existing selection, similar to category filter switching.
+        // ###########################################################################################
+        private async Task ApplyRegionFilterAsync()
+        {
+            if (this._currentBoardData == null)
+                return;
+
+            // Rebuild highlight rectangles for just the targeted region out of the current board data
+            this._highlightRectsBySchematicAndLabel = await Task.Run(() =>
+                BuildHighlightRects(this._currentBoardData, UserSettings.Region));
+
+            // Snapshot previously selected labels
+            var previouslySelectedLabels = new HashSet<string>(
+                this.ComponentFilterListBox.SelectedItems?.Cast<ComponentListItem>()
+                    .Select(i => i.BoardLabel) ?? [],
+                StringComparer.OrdinalIgnoreCase);
+
+            var activeCategories = new HashSet<string>(
+                this.CategoryFilterListBox.SelectedItems?.Cast<string>() ?? [],
+                StringComparer.OrdinalIgnoreCase);
+            var componentItems = BuildComponentItems(this._currentBoardData, UserSettings.Region, activeCategories);
+
+            // Re-populate ComponentFilterListBox contents
+            this._suppressComponentHighlightUpdate = true;
+            this.ComponentFilterListBox.ItemsSource = componentItems;
+
+            for (int i = 0; i < componentItems.Count; i++)
+            {
+                if (previouslySelectedLabels.Contains(componentItems[i].BoardLabel))
+                    this.ComponentFilterListBox.Selection.Select(i);
+            }
+            this._suppressComponentHighlightUpdate = false;
+
+            var survivingLabels = componentItems
+                .Where(item => previouslySelectedLabels.Contains(item.BoardLabel))
+                .Select(item => item.BoardLabel)
+                .Where(l => !string.IsNullOrEmpty(l))
+                .ToList();
+
+            this.UpdateHighlightsForComponents(survivingLabels);
+        }
     }
 }

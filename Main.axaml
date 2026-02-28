@@ -222,29 +222,35 @@
                             HorizontalAlignment="Stretch" 
                             HorizontalContentAlignment="Center"
                             FontSize="12"
-                            Padding="4" />
+                            Padding="4"
+                            Click="OnClearComponentsClick" />
                     <Button Grid.Column="2" 
                             Content="Mark all" 
                             HorizontalAlignment="Stretch" 
                             HorizontalContentAlignment="Center"
                             FontSize="12"
-                            Padding="4" />
+                            Padding="4"
+                            Click="OnMarkAllComponentsClick" />
                 </Grid>
 
                 <!-- Video standard -->
                 <Grid ColumnDefinitions="*,4,*">
-                    <Button Grid.Column="0" 
+                    <Button x:Name="PalRegionButton"
+                            Grid.Column="0" 
                             Content="PAL" 
                             HorizontalAlignment="Stretch" 
                             HorizontalContentAlignment="Center"
                             FontSize="12"
-                            Padding="4" />
-                    <Button Grid.Column="2" 
+                            Padding="4"
+                            Click="OnPalRegionClick" />
+                    <Button x:Name="NtscRegionButton"
+                            Grid.Column="2" 
                             Content="NTSC" 
                             HorizontalAlignment="Stretch" 
                             HorizontalContentAlignment="Center"
                             FontSize="12"
-                            Padding="4" />
+                            Padding="4"
+                            Click="OnNtscRegionClick" />
                 </Grid>
 
                 <!-- View options -->
