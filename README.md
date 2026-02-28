@@ -2,7 +2,7 @@
 
 Will be updated in the coming days ...
 
-# Requirements
+## Requirements
 
 - .NET 10, https://dotnet.microsoft.com/en-us/download/dotnet/10.0
 - 64-bit operating system:
@@ -16,7 +16,7 @@ Will be updated in the coming days ...
       - X11
       - Wayland
 
-# Confirmed working on
+## Confirmed working on
 
 - Windows 10
 - Windows 11
