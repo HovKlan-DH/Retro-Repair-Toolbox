@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Retro-Repair-Toolbox": {
+      "commandName": "Project",
+      "hotReloadEnabled": false
+    }
+  }
+}
