@@ -7,16 +7,16 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Version for this release (ex. 2.0.0)'
+        description: 'Version for release (ex. 1.0.0)'
         required: true
-        default: '1.9.0'
+        default: '0.1.0'
 
 env:
-  PACK_ID: Commodore-Repair-Toolbox
-  EXE_WINDOWS: Commodore-Repair-Toolbox.exe
-  EXE_UNIX: Commodore-Repair-Toolbox
-  PROJECT: CRT2.csproj
-  DATA_PACK_URL: https://commodore-repair-toolbox.dk/auto-data/Data.zip
+  PACK_ID: Retro-Repair-Toolbox
+  EXE_WINDOWS: Retro-Repair-Toolbox.exe
+  EXE_UNIX: Retro-Repair-Toolbox
+  PROJECT: Retro-Repair-Toolbox.csproj
+  DATA_PACK_URL: https://retro-repair-toolbox.dk/app-data/Data.zip
 
 jobs:
 
@@ -29,8 +29,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: crt-v2
 
       - name: Set version
         id: ver
@@ -83,10 +81,9 @@ jobs:
             --packDir publish/windows-x64 `
             --mainExe ${{ env.EXE_WINDOWS }} `
             --noPortable `
-            --icon "Assets/Commodore icon.ico" `
+            --icon "Assets/RRT_icon.ico" `
             --outputDir velopack-output
 
-      # ✅ NEW: Sign the Velopack Setup installer after packing
       - name: Sign Velopack installer
         shell: powershell
         env:
@@ -115,8 +112,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: crt-v2
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -131,7 +126,7 @@ jobs:
           else
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
-    
+
       - name: Publish Linux (x64)
         run: |
           dotnet publish ${{ env.PROJECT }} \
@@ -156,7 +151,7 @@ jobs:
             --packVersion ${{ steps.ver.outputs.version }} \
             --packDir publish/linux-x64 \
             --mainExe ${{ env.EXE_UNIX }} \
-            --icon "Assets/Commodore icon.ico" \
+            --icon "Assets/RRT_icon.ico" \
             --outputDir velopack-output
 
       - name: Upload Velopack artifacts
@@ -174,9 +169,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: crt-v2
-          
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -190,7 +183,7 @@ jobs:
           else
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
-    
+
       - name: Publish macOS (arm64)
         run: |
           dotnet publish ${{ env.PROJECT }} \
@@ -227,7 +220,7 @@ jobs:
             --mainExe ${{ env.EXE_UNIX }} \
             --channel osx-arm64 \
             --noPortable \
-            --icon "Assets/Commodore icon.icns" \
+            --icon "Assets/RRT_icon.icns" \
             --outputDir velopack-output
 
       - name: Pack with Velopack (macOS x64)
@@ -239,7 +232,7 @@ jobs:
             --mainExe ${{ env.EXE_UNIX }} \
             --channel osx-x64 \
             --noPortable \
-            --icon "Assets/Commodore icon.icns" \
+            --icon "Assets/RRT_icon.icns" \
             --outputDir velopack-output
 
       - name: Upload Velopack artifacts
@@ -277,28 +270,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: "DEVELOPMENT - CRT2 ${{ steps.tag.outputs.tag }}"
+          name: "DEVELOPMENT - RRT ${{ steps.tag.outputs.tag }}"
           body: |
-            If you are looking for the normal/stable version, then look below and find the next release, **2026-February-21**.
+            **Retro Repair Toolbox** is a new application built from scratch to natively support **Windows**, **Linux** and **macOS**. There will be many alpha-releases until the final version will be named **2.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
 
-            **CRT2** is a new application built from scratch to natively support **Windows**, **Linux** and **macOS**. There will be many alpha-releases until the final version will be named **2.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
-            
-            You only need to install the CRT2 application once, and thereafter you can update directly from inside the application.
-            
+            You only need to install the Retro Repair Toolbox application once, and thereafter you can update directly from inside the application.
+
             > [!CAUTION]
-            > **DO NOT DOWNLOAD IF YOU DO NOT KNOW WHAT THIS VERSION IS** - use stable version available in below release
-            
+            > **DO NOT DOWNLOAD IF YOU DO NOT KNOW WHAT THIS VERSION IS** - use the stable version if available
+
             > [!CAUTION]
             > **DO NOT REPORT BUGS IN "ISSUES"**, as this is way too early for that. Instead you can participate in the online Discord discussion here, https://discord.gg/HDWct2vxem
-            
-            
+
+
             ### Direct downloads for different platforms
             | Platform | File |
             |----------|------|
-            | Windows x64 | [Commodore-Repair-Toolbox-win-Setup.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Commodore-Repair-Toolbox-win-Setup.exe) |
-            | Linux x64 | [Commodore-Repair-Toolbox.AppImage](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Commodore-Repair-Toolbox.AppImage) |
-            | macOS arm64 Apple Silicon | [Commodore-Repair-Toolbox-osx-arm64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Commodore-Repair-Toolbox-osx-arm64-Setup.pkg) |
-            | macOS x64 Intel | [Commodore-Repair-Toolbox-osx-x64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Commodore-Repair-Toolbox-osx-x64-Setup.pkg) |
+            | Windows x64 | [Retro-Repair-Toolbox-win-Setup.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-win-Setup.exe) |
+            | Linux x64 | [Retro-Repair-Toolbox.AppImage](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox.AppImage) |
+            | macOS arm64 Apple Silicon | [Retro-Repair-Toolbox-osx-arm64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-osx-arm64-Setup.pkg) |
+            | macOS x64 Intel | [Retro-Repair-Toolbox-osx-x64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-osx-x64-Setup.pkg) |
           draft: false
           prerelease: true
           files: |
