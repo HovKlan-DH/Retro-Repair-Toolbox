@@ -144,6 +144,14 @@ namespace RRT
                 ? $"Retro Repair Toolbox {versionString}"
                 : "Retro Repair Toolbox";
 
+            // Determine if Dark Theme is actively evaluated during startup.
+            var isDark = Application.Current?.RequestedThemeVariant == Avalonia.Styling.ThemeVariant.Dark ||
+                         (Application.Current?.RequestedThemeVariant == Avalonia.Styling.ThemeVariant.Default &&
+                          Application.Current?.ActualThemeVariant == Avalonia.Styling.ThemeVariant.Dark);
+
+            this.ThemeToggleSwitch.IsChecked = isDark;
+            this.ThemeToggleSwitch.IsCheckedChanged += this.OnThemeToggleSwitchChanged;
+
             // Initialize configuration checkboxes — subscribe after setting initial values
             // to avoid triggering redundant saves during startup
             this.CheckVersionOnLaunchCheckBox.IsChecked = UserSettings.CheckVersionOnLaunch;
@@ -966,6 +974,22 @@ namespace RRT
                 v /= 100.0;
 
             return Math.Clamp(v, 0.0, 1.0);
+        }
+
+        // ###########################################################################################
+        // Applies and persists the selected application theme dynamically.
+        // ###########################################################################################
+        private void OnThemeToggleSwitchChanged(object? sender, RoutedEventArgs e)
+        {
+            var isDark = this.ThemeToggleSwitch.IsChecked == true;
+            var newVariant = isDark ? Avalonia.Styling.ThemeVariant.Dark : Avalonia.Styling.ThemeVariant.Light;
+
+            if (Application.Current != null)
+            {
+                Application.Current.RequestedThemeVariant = newVariant;
+            }
+
+            UserSettings.ThemeVariant = isDark ? "Dark" : "Light";
         }
 
         // ###########################################################################################

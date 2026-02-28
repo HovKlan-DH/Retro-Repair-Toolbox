@@ -125,6 +125,14 @@ namespace RRT
             Logger.Initialize();
             UserSettings.Load();
 
+            // Apply selected theme early
+            if (UserSettings.ThemeVariant == "Dark")
+                this.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+            else if (UserSettings.ThemeVariant == "Light")
+                this.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light;
+            else
+                this.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Default;
+
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             Logger.Info(version != null
                 ? $"Retro Repair Toolbox version [{version.Major}.{version.Minor}.{version.Build}] launched"

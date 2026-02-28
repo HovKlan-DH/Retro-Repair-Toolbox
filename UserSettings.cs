@@ -22,7 +22,7 @@ namespace RRT
         [JsonPropertyName("leftPanelWidth")] public double LeftPanelWidth { get; set; } = 200.0;
         [JsonPropertyName("schematicsSplitterRatios")] public Dictionary<string, double> SchematicsSplitterRatios { get; set; } = new();
         [JsonPropertyName("selectedCategoriesByBoard")] public Dictionary<string, List<string>> SelectedCategoriesByBoard { get; set; } = new();
-
+        [JsonPropertyName("themeVariant")] public string ThemeVariant { get; set; } = "Default";
         [JsonPropertyName("hasWindowPlacement")] public bool HasWindowPlacement { get; set; } = false;
         [JsonPropertyName("windowState")] public string WindowState { get; set; } = "Normal";
         [JsonPropertyName("windowWidth")] public double WindowWidth { get; set; } = 1024.0;
@@ -34,6 +34,7 @@ namespace RRT
         [JsonPropertyName("windowScreenWidth")] public int WindowScreenWidth { get; set; } = 1920;
         [JsonPropertyName("windowScreenHeight")] public int WindowScreenHeight { get; set; } = 1080;
         [JsonPropertyName("windowScreenScaling")] public double WindowScreenScaling { get; set; } = 1.0;
+
     }
 
     // ###########################################################################################
@@ -74,6 +75,17 @@ namespace RRT
             {
                 _data.LeftPanelWidth = value;
                 Logger.Info($"Setting changed - [LeftPanelWidth] [{value:F1}]");
+                Save();
+            }
+        }
+
+        public static string ThemeVariant
+        {
+            get => _data.ThemeVariant;
+            set
+            {
+                _data.ThemeVariant = value;
+                Logger.Info($"Setting changed - [ThemeVariant] [{value}]");
                 Save();
             }
         }

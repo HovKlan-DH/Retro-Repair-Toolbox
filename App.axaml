@@ -2,9 +2,88 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="RRT.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppThemeAccentBrush">IndianRed</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentLightBrush">LightCoral</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentHoverBrush">#C05050</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentPressedBrush">#8B2020</SolidColorBrush>
+                    
+                    <SolidColorBrush x:Key="AppThemeBannerBackgroundBrush">#4C1515</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerTextBrush">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerDismissHoverBrush">#6B2020</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerDismissPressedBrush">#4C1515</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeTextBrush">Black</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeSecondaryTextBrush">Gray</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBackgroundBrush">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBorderBrush">Gray</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemePanelBorderBrush">IndianRed</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeListBackgroundBrush">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectionBrush">LightBlue</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectionHoverBrush">SkyBlue</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectedTextBrush">White</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeThumbBorderSolidBrush">Black</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeThumbSelectedBorderBrush">IndianRed</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeThumbLabelBackgroundBrush">Khaki</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeStatusBackgroundBrush">LightYellow</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeStatusTextBrush">DarkBlue</SolidColorBrush>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <!-- Stylish brown'ish theme -->
+                    <SolidColorBrush x:Key="AppThemeAccentBrush">#B87352</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentLightBrush">#CD8B6A</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentHoverBrush">#A06346</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeAccentPressedBrush">#855138</SolidColorBrush>
+                    
+                    <SolidColorBrush x:Key="AppThemeBannerBackgroundBrush">#38241A</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerTextBrush">#E8E0DA</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerDismissHoverBrush">#4F3528</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBannerDismissPressedBrush">#2B1B13</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeTextBrush">#E8E0DA</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeSecondaryTextBrush">#A3938A</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBackgroundBrush">#201C1A</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeBorderBrush">#524842</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemePanelBorderBrush">#B87352</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeListBackgroundBrush">#2A2421</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectionBrush">#5E4334</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectionHoverBrush">#735443</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeListSelectedTextBrush">#FFFFFF</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="AppThemeThumbBorderSolidBrush">#524842</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeThumbSelectedBorderBrush">#B87352</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeThumbLabelBackgroundBrush">#3D302A</SolidColorBrush>
+                    
+                    <SolidColorBrush x:Key="AppThemeStatusBackgroundBrush">#3D302A</SolidColorBrush>
+                    <SolidColorBrush x:Key="AppThemeStatusTextBrush">#E8E0DA</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <!-- Native Avalonia controls themed towards brown/copper -->
+                <ColorPaletteResources x:Key="Dark"
+                                       RegionColor="#201C1A"
+                                       BaseHigh="#E8E0DA"
+                                       BaseLow="#3E342F"
+                                       BaseMedium="#A3938A"
+                                       ChromeLow="#1E1815"
+                                       ChromeMedium="#261E1A"
+                                       ChromeWhite="White"
+                                       Accent="#B87352" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
     </Application.Styles>
 </Application>
