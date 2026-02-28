@@ -15,8 +15,8 @@
     <Authors>Dennis Helligsoe</Authors>
     <Copyright>©2025-2026</Copyright>
     <PackageProjectUrl>https://github.com/HovKlan-DH/Retro-Retro-Toolbox</PackageProjectUrl>
-    <PackageIcon>Application_icon.png</PackageIcon>
-	<ApplicationIcon>Assets\Application_icon.ico</ApplicationIcon>
+    <PackageIcon>RRT_icon.png</PackageIcon>
+	<ApplicationIcon>Assets\RRT_icon.ico</ApplicationIcon>
     <AssemblyVersion>0.1.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version>$(AssemblyVersion)</Version>
@@ -56,7 +56,7 @@
  </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Application_icon.ico" />
+    <Content Include="Assets\RRT_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,7 +71,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\Application_icon.png">
+    <None Update="Assets\RRT_icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
