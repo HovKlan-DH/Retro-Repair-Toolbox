@@ -1476,22 +1476,14 @@ namespace RRT
         }
 
         // ###########################################################################################
-        // Updates the PAL/NTSC buttons' background to reflect the currently active region selection.
+        // Updates the PAL/NTSC buttons' active visual class to reflect selected region.
         // ###########################################################################################
         private void UpdateRegionButtonsState()
         {
-            var activeBrush = this.FindResource("AppThemeListSelectionBrush") as IBrush;
+            var isPal = string.Equals(UserSettings.Region, "PAL", StringComparison.OrdinalIgnoreCase);
 
-            if (string.Equals(UserSettings.Region, "PAL", StringComparison.OrdinalIgnoreCase))
-            {
-                this.PalRegionButton.Background = activeBrush;
-                this.NtscRegionButton.Background = null;
-            }
-            else
-            {
-                this.PalRegionButton.Background = null;
-                this.NtscRegionButton.Background = activeBrush;
-            }
+            this.PalRegionButton.Classes.Set("active", isPal);
+            this.NtscRegionButton.Classes.Set("active", !isPal);
         }
 
         // ###########################################################################################

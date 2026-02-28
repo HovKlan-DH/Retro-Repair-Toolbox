@@ -55,6 +55,22 @@
             <Setter Property="Background" Value="{DynamicResource AppThemeBannerDismissPressedBrush}" />
         </Style>
 
+        <!-- Region toggle buttons -->
+        <Style Selector="Button.RegionToggle /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppThemeBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style Selector="Button.RegionToggle.active /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AppThemeAccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppThemeAccentBrush}" />
+        </Style>
+
+        <Style Selector="Button.RegionToggle.active">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+
     </Window.Styles>
 
     <Grid x:Name="RootGrid">
@@ -236,17 +252,19 @@
                 <!-- Video standard -->
                 <Grid ColumnDefinitions="*,4,*">
                     <Button x:Name="PalRegionButton"
-                            Grid.Column="0" 
-                            Content="PAL" 
-                            HorizontalAlignment="Stretch" 
+                            Classes="RegionToggle"
+                            Grid.Column="0"
+                            Content="PAL"
+                            HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             FontSize="12"
                             Padding="4"
                             Click="OnPalRegionClick" />
                     <Button x:Name="NtscRegionButton"
-                            Grid.Column="2" 
-                            Content="NTSC" 
-                            HorizontalAlignment="Stretch" 
+                            Classes="RegionToggle"
+                            Grid.Column="2"
+                            Content="NTSC"
+                            HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             FontSize="12"
                             Padding="4"
