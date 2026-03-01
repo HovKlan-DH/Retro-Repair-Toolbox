@@ -5,7 +5,7 @@ _Retro Repair Toolbox_ (or **RRT** hence forward) is a utility tool for repairin
 > [!CAUTION]
 > Please note that this is currently in active DEVELOPMENT, and not all functionalities are working.
 
-The project is a direct spin-off from my other project, [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox) (**CRT**) and once the development finalizes, then the **CRT** project will get archived and this new project will take over.
+The project is a direct spin-off from my other project, [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox) (**CRT**) and once the development finalizes for **RRT**, then the **CRT** project will get archived on GitHub and this new project will take over.
 
 ## Requirements
 
