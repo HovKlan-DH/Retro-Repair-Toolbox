@@ -270,18 +270,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: "DEVELOPMENT - RRT ${{ steps.tag.outputs.tag }}"
+          name: "DEVELOPMENT - Retro Repair Toolbox ${{ steps.tag.outputs.tag }}"
           body: |
-            **Retro Repair Toolbox** is a new application built from scratch to natively support **Windows**, **Linux** and **macOS**. There will be many alpha-releases until the final version will be named **2.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
+            **Retro Repair Toolbox** is identical to [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox), but this new project will natively support **Windows**, **Linux** and **macOS**. There will be many development-releases until the final version will be named **1.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
 
-            You only need to install the Retro Repair Toolbox application once, and thereafter you can update directly from inside the application.
-
-            > [!CAUTION]
-            > **DO NOT DOWNLOAD IF YOU DO NOT KNOW WHAT THIS VERSION IS** - use the stable version if available
-
-            > [!CAUTION]
-            > **DO NOT REPORT BUGS IN "ISSUES"**, as this is way too early for that. Instead you can participate in the online Discord discussion here, https://discord.gg/HDWct2vxem
-
+            You only need to install the **Retro Repair Toolbox** application once, and thereafter you can update directly from inside the application.
 
             ### Direct downloads for different platforms
             | Platform | File |
