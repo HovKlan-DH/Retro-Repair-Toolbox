@@ -471,7 +471,9 @@ namespace CRT
                     ImageFilePath = fullPath,
                     BaseThumbnail = baseThumbnail,
                     OriginalPixelSize = originalPixelSize,
-                    ImageSource = baseThumbnail
+                    ImageSource = baseThumbnail,
+                    VisualOpacity = 1.0,
+                    IsMatchForSelection = false
                 });
             }
 
@@ -808,7 +810,7 @@ namespace CRT
         }
 
         // ###########################################################################################
-        // Handles right-click deselection on hovered component; otherwise right-click starts panning.
+        // Handles right-click toggle on hovered component; otherwise right-click starts panning.
         // Left-click selects hovered component, and single-click opens the component info popup.
         // Double-click currently has no extra functionality.
         // ###########################################################################################
@@ -821,7 +823,7 @@ namespace CRT
             {
                 if (this.TryGetHoveredBoardLabel(point, out var hoveredBoardLabel, out _))
                 {
-                    this.DeselectComponentByBoardLabel(hoveredBoardLabel);
+                    this.ToggleComponentSelectionByBoardLabel(hoveredBoardLabel);
                     this.UpdateSchematicsHoverUi(point);
                     e.Handled = true;
                     return;
@@ -1001,15 +1003,20 @@ namespace CRT
             }
             this.SchematicsHighlightsOverlay.InvalidateVisual();
 
+            bool hasSelection = boardLabels.Count > 0;
+
             // Regenerate thumbnails that have matching highlights; restore others to base
             foreach (var thumb in this._currentThumbnails)
             {
                 if (thumb.BaseThumbnail == null)
                     continue;
 
+                bool hasMatch = false;
+
                 if (this._highlightIndexBySchematic.TryGetValue(thumb.Name, out var thumbIndex) &&
                     this._schematicByName.TryGetValue(thumb.Name, out var thumbSchematic))
                 {
+                    hasMatch = true;
                     var highlighted = CreateHighlightedThumbnail(thumb.BaseThumbnail, thumb.OriginalPixelSize, thumbIndex, thumbSchematic);
                     var old = thumb.ImageSource;
                     thumb.ImageSource = highlighted;
@@ -1025,6 +1032,14 @@ namespace CRT
                         (old as IDisposable)?.Dispose();
                     }
                 }
+
+                bool isRelevantForDimming = !hasSelection || hasMatch;
+
+                // Dim thumbnails that are not relevant to the current multi-selection.
+                thumb.VisualOpacity = isRelevantForDimming ? 1.0 : 0.35;
+
+                // Label accent only when there is an active selection and this thumbnail matches it.
+                thumb.IsMatchForSelection = hasSelection && hasMatch;
             }
         }
 
@@ -1941,21 +1956,25 @@ namespace CRT
             }
         }
 
+        // ###########################################################################################
+        // Toggles selection for a component board label:
+        // if any matching row is selected, all matching rows are deselected; otherwise first is selected.
+        // ###########################################################################################
+        private void ToggleComponentSelectionByBoardLabel(string boardLabel)
+        {
+            bool hasSelectedMatch = this.ComponentFilterListBox.SelectedItems?
+                .Cast<ComponentListItem>()
+                .Any(i => string.Equals(i.BoardLabel, boardLabel, StringComparison.OrdinalIgnoreCase)) ?? false;
 
+            if (hasSelectedMatch)
+            {
+                this.DeselectComponentByBoardLabel(boardLabel);
+                return;
+            }
 
-
-
-
-
-
+            this.SelectComponentByBoardLabel(boardLabel);
+        }
 
 
     }
-
-
-
-
-
-
-
 }
