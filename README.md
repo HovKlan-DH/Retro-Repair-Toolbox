@@ -22,6 +22,18 @@ The project is a direct spin-off from my other project, [Commodore Repair Toolbo
       - X11
       - Wayland
 
+## Compiling with Linux
+
+Assuming some other dependencies exist, all it should be needed is to clone this repo, install dependencies
+
+- sudo dnf install dotnet-runtime-10.0 dotnet-sdk-10.0
+
+Run ```dotnet build``` for debug build
+./bin/Debug/net10.0/Classic-Repair-Toolbox
+
+or ```dotnet publish```  for production
+./bin/Release/net10.0/Classic-Repair-Toolbox
+
 ## Confirmed working on
 
 - Windows 10
@@ -29,3 +41,4 @@ The project is a direct spin-off from my other project, [Commodore Repair Toolbo
 - ZorinOS
 - RHEL 9.7
 - macOS Intel (Tahoe)
+- Fedora 43 x86_64
