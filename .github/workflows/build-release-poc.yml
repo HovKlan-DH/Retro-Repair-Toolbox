@@ -274,6 +274,8 @@ jobs:
           body: |
             **Classic Repair Toolbox** is identical to [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox), but this new project will natively support **Windows**, **Linux** and **macOS**. There will be many development-releases until the final version will be named **1.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
 
+            The best way for direct communication in terms of this development is via the _Retro Hardware Discord_ channel [https://discord.gg/HDWct2vxem](https://discord.gg/HDWct2vxem)
+
             You only need to install the **Classic Repair Toolbox** application once, and thereafter you can update directly from inside the application.
 
             ### Direct downloads for different platforms
