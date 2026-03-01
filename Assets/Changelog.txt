@@ -1,4 +1,10 @@
-The DEVELOPMENT version will most likely keep running on 0.1.x
+The DEVELOPMENT version will most likely keep running on 0.1.x until final release.
+
+
+# 0.1.2, 2026-March-1
+---------------------
+* Renamed project to "Classic Repair Toolbox"
+
 
 # 0.1.1, 2026-March-1
 ---------------------
