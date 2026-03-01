@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/HovKlan-DH/Retro-Retro-Toolbox</PackageProjectUrl>
     <PackageIcon>RRT_icon.png</PackageIcon>
 	<ApplicationIcon>Assets\RRT_icon.ico</ApplicationIcon>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <AssemblyVersion>0.1.1</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version>$(AssemblyVersion)</Version>
     <Description>A utility tool for retro hardware repairing, troubleshooting and diagnosing.</Description>
