@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Persisted user preferences model. Defaults to enabled for all online features.

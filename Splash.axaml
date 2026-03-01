@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="RRT.Splash"
+        x:Class="CRT.Splash"
         Width="600" Height="400"
         WindowStartupLocation="CenterScreen"
         SystemDecorations="None"
@@ -17,11 +17,11 @@
             ClipToBounds="True">
         
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-            <Image Source="avares://Retro-Repair-Toolbox/Assets/RRT_icon.png"
+            <Image Source="avares://Classic-Repair-Toolbox/Assets/CRT_icon.png"
                    Width="128" Height="128" 
                    Margin="0,0,0,8" />
 
-            <TextBlock Text="Retro Repair Toolbox"
+            <TextBlock Text="Classic Repair Toolbox"
                        FontSize="36"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource AppThemeTextBrush}"

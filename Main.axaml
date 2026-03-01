@@ -2,10 +2,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RRT"
+        xmlns:local="clr-namespace:CRT"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="RRT.Main"
-        Title="Retro Repair Toolbox"
+        x:Class="CRT.Main"
+        Title="Classic Repair Toolbox"
         MinWidth="800"
         MinHeight="500">
 
@@ -619,7 +619,7 @@
                                         Spacing="16"
                                         VerticalAlignment="Center">
                             
-                                <Image Source="avares://Retro-Repair-Toolbox/Assets/RRT_icon.png"
+                                <Image Source="avares://Classic-Repair-Toolbox/Assets/CRT_icon.png"
                                        Width="96"
                                        Height="96" />
                             
@@ -646,7 +646,7 @@
                                         Spacing="6">
                                 <TextBlock Text="GitHub project page:"
                                            VerticalAlignment="Center" />
-                                <Button Content="https://github.com/HovKlan-DH/Retro-Repair-Toolbox"
+                                <Button Content="https://github.com/HovKlan-DH/Classic-Repair-Toolbox"
                                         Padding="0"
                                         BorderThickness="0"
                                         Background="Transparent"
@@ -660,7 +660,7 @@
                                         Spacing="6">
                                 <TextBlock Text="Helper page:"
                                            VerticalAlignment="Center" />
-                                <Button Content="https://retro-repair-toolbox.dk"
+                                <Button Content="https://classic-repair-toolbox.dk"
                                         Padding="0"
                                         BorderThickness="0"
                                         Background="Transparent"

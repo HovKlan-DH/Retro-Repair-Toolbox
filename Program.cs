@@ -2,7 +2,7 @@
 using Avalonia;
 using System;
 
-namespace Retro_Repair_Toolbox
+namespace Classic_Repair_Toolbox
 {
     internal class Program
     {
@@ -19,7 +19,7 @@ namespace Retro_Repair_Toolbox
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<RRT.App>()
+            => AppBuilder.Configure<CRT.App>()
                 .UsePlatformDetect()
                 .WithInterFont()
                 .LogToTrace();

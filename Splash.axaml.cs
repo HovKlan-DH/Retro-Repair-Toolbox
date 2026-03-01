@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using Avalonia.Controls;
 
-namespace RRT
+namespace CRT
 {
     public partial class Splash : Window
     {

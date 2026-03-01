@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace RRT
+namespace CRT
 {
     internal sealed class DataFileEntry
     {

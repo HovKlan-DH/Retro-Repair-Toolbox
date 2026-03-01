@@ -3,7 +3,7 @@ using Avalonia.Media;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Represents a single schematic thumbnail item for display in the Schematics tab gallery.

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Spatial index for fast "visible rect" queries of many component highlight rectangles.

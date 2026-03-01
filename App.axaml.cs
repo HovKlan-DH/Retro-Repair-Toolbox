@@ -6,7 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Central configuration — all tunable application values are defined here.
@@ -33,32 +33,32 @@ namespace RRT
 
         // Short application code name used for User-Agent headers and API control payloads.
         // Used by: OnlineServices
-        public const string AppShortName = "RRT";
+        public const string AppShortName = "CRT";
 
         // Name of the local AppData subfolder used for data and log storage.
         // Used by: DataManager.ResolveDataRoot, Logger.Initialize
-        public const string AppFolderName = "Retro-Repair-Toolbox";
+        public const string AppFolderName = "Classic-Repair-Toolbox";
 
         // Name of the log file written inside the AppFolderName directory.
         // Used by: Logger.Initialize
-        public const string LogFileName = "Retro-Repair-Toolbox.log";
+        public const string LogFileName = "Classic-Repair-Toolbox.log";
         // Name of the JSON file storing user preferences. Stored alongside the log file.
         // Used by: UserSettings.Load
-        public const string SettingsFileName = "Retro-Repair-Toolbox.settings.json";
+        public const string SettingsFileName = "Classic-Repair-Toolbox.settings.json";
 
         // Name of the main Excel file containing all hardware and board definitions.
         // Used by: DataManager.InitializeAsync, DataManager.LoadMainExcel
-        public const string MainExcelFileName = "Retro-Repair-Toolbox.xlsx";
+        public const string MainExcelFileName = "Classic-Repair-Toolbox.xlsx";
 
         // ===== Online Services =====================================================================
 
         // URL to the JSON manifest listing all data files and their SHA-256 checksums.
         // Used by: OnlineServices.FetchManifestAsync
-        public const string ChecksumsUrl = "https://retro-repair-toolbox.dk/app-data/dataChecksums.json";
+        public const string ChecksumsUrl = "https://classic-repair-toolbox.dk/app-data/dataChecksums.json";
 
         // URL for the phone-home version check endpoint.
         // Used by: OnlineServices.CheckInVersionAsync
-        public const string CheckVersionUrl = "https://retro-repair-toolbox.dk/app-checkin/";
+        public const string CheckVersionUrl = "https://classic-repair-toolbox.dk/app-checkin/";
 
         // Timeout for lightweight API calls (manifest fetch, version check).
         // Used by: OnlineServices.FetchManifestAsync, OnlineServices.CheckInVersionAsync
@@ -76,7 +76,7 @@ namespace RRT
 
         // GitHub repository name used to check for application updates via Velopack.
         // Used by: UpdateService.CheckForUpdateAsync
-        public const string GitHubRepo = "Retro-Repair-Toolbox";
+        public const string GitHubRepo = "Classic-Repair-Toolbox";
 
         // Whether to include pre-release versions in the update check.
         // Used by: UpdateService.CheckForUpdateAsync
@@ -145,8 +145,8 @@ namespace RRT
             var versionString = AppConfig.GetDisplayVersion(version);
 
             Logger.Info(version != null
-                ? $"Retro Repair Toolbox version [{versionString}] launched"
-                : "Retro Repair Toolbox launched");
+                ? $"Classic Repair Toolbox version [{versionString}] launched"
+                : "Classic Repair Toolbox launched");
 
             var os = RuntimeInformation.OSDescription;
             Logger.Info($"Operating system is [{os}]");

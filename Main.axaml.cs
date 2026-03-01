@@ -18,7 +18,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RRT
+namespace CRT
 {
     public partial class Main : Window
     {
@@ -146,8 +146,8 @@ namespace RRT
             this.PopulateAboutTab(assembly, hasVersion ? versionString : null);
 
             this.Title = hasVersion
-                ? $"Retro Repair Toolbox {versionString}"
-                : "Retro Repair Toolbox";
+                ? $"Classic Repair Toolbox {versionString}"
+                : "Classic Repair Toolbox";
 
             // Determine if Dark Theme is actively evaluated during startup.
             var isDark = Application.Current?.RequestedThemeVariant == Avalonia.Styling.ThemeVariant.Dark ||
@@ -1508,7 +1508,7 @@ namespace RRT
             if (!string.IsNullOrWhiteSpace(titleAttribute?.Title))
                 return titleAttribute.Title;
 
-            return assembly.GetName().Name ?? "Retro Repair Toolbox";
+            return assembly.GetName().Name ?? "Classic Repair Toolbox";
         }
 
         // ###########################################################################################
@@ -1518,7 +1518,7 @@ namespace RRT
         {
             try
             {
-                var assetUri = new Uri($"avares://Retro-Repair-Toolbox/{assetPath}");
+                var assetUri = new Uri($"avares://Classic-Repair-Toolbox/{assetPath}");
                 using var stream = AssetLoader.Open(assetUri);
                 using var reader = new StreamReader(stream);
                 return reader.ReadToEnd();
@@ -1554,7 +1554,7 @@ namespace RRT
         // ###########################################################################################
         private void OnGitHubProjectPageClick(object? sender, RoutedEventArgs e)
         {
-            this.OpenUrl("https://github.com/HovKlan-DH/Retro-Repair-Toolbox");
+            this.OpenUrl("https://github.com/HovKlan-DH/Classic-Repair-Toolbox");
         }
 
         // ###########################################################################################
@@ -1562,7 +1562,7 @@ namespace RRT
         // ###########################################################################################
         private void OnHelperPageClick(object? sender, RoutedEventArgs e)
         {
-            this.OpenUrl("https://retro-repair-toolbox.dk");
+            this.OpenUrl("https://classic-repair-toolbox.dk");
         }
 
         // ###########################################################################################

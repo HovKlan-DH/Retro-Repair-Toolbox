@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Velopack;
 using Velopack.Sources;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Handles checking for, downloading, and applying application updates via Velopack.

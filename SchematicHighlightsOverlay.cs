@@ -4,7 +4,7 @@ using Avalonia.Media;
 using System;
 using System.Collections.Generic;
 
-namespace RRT
+namespace CRT
 {
     // ###########################################################################################
     // Draws component highlight rectangles over a schematic image.

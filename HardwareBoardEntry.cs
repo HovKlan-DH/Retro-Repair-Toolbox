@@ -1,4 +1,4 @@
-﻿namespace RRT
+﻿namespace CRT
 {
     // ###########################################################################################
     // Represents a single hardware/board entry from the main Excel data file.

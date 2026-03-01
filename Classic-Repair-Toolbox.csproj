@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Retro-Repair-Toolbox</AssemblyName>
+    <AssemblyName>Classic-Repair-Toolbox</AssemblyName>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -8,19 +8,19 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <RuntimeIdentifiers>win-x86;win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
-    <AssemblyTitle>Retro Repair Toolbox</AssemblyTitle>
-    <Title>Retro Repair Toolbox</Title>
-    <Product>Retro Repair Toolbox</Product>
+    <AssemblyTitle>Classic Repair Toolbox</AssemblyTitle>
+    <Title>Classic Repair Toolbox</Title>
+    <Product>Classic Repair Toolbox</Product>
     <Company>HovKlan</Company>
     <Authors>Dennis Helligsoe</Authors>
     <Copyright>©2025-2026</Copyright>
-    <PackageProjectUrl>https://github.com/HovKlan-DH/Retro-Retro-Toolbox</PackageProjectUrl>
-    <PackageIcon>RRT_icon.png</PackageIcon>
-	<ApplicationIcon>Assets\RRT_icon.ico</ApplicationIcon>
-    <AssemblyVersion>0.1.1</AssemblyVersion>
+    <PackageProjectUrl>https://github.com/HovKlan-DH/Classic-Repair-Toolbox</PackageProjectUrl>
+    <PackageIcon>CRT_icon.png</PackageIcon>
+	<ApplicationIcon>Assets\CRT_icon.ico</ApplicationIcon>
+    <AssemblyVersion>0.1.2</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version>$(AssemblyVersion)</Version>
-    <Description>A utility tool for retro hardware repairing, troubleshooting and diagnosing.</Description>
+    <Description>A utility tool for classic and retro hardware repairing, troubleshooting and diagnosing.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,7 +56,7 @@
  </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\RRT_icon.ico" />
+    <Content Include="Assets\CRT_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,7 +71,7 @@
   </ItemGroup>
 
     <ItemGroup>
-	    <AvaloniaResource Update="Assets\RRT_icon.png">
+	    <AvaloniaResource Update="Assets\CRT_icon.png">
 		    <Pack>True</Pack>
 		    <PackagePath>\</PackagePath>
 	    </AvaloniaResource>
