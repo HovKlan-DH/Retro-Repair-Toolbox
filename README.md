@@ -10,8 +10,9 @@ The project is a direct spin-off from my other project, [Commodore Repair Toolbo
 ## Requirements
 
 - .NET 10, https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+  - This is an LTS release (Long Time Stable) version
 - 64-bit operating system:
-  - **Windows** 10 build 1607 or newer ( can it run on older versions with .NET 10???)
+  - **Windows** 10 build 1607 or newer (can it run on older versions with .NET 10???)
   - **macOS** 14 (Sonoma) or newer
   - **Linux**:
     - glibc 2.17+
