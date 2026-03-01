@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Avalonia.Controls;
 
 namespace RRT
@@ -8,6 +9,13 @@ namespace RRT
         public Splash()
         {
             InitializeComponent();
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var version = assembly.GetName().Version;
+            var versionString = AppConfig.GetDisplayVersion(version);
+
+            this.VersionNumberRun.Text = versionString;
+
             DataManager.StatusChanged += this.OnStatusChanged;
             DataManager.FileDownloadChanged += this.OnFileDownloadChanged;
         }

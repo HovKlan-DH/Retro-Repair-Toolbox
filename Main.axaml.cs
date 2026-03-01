@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -54,6 +55,8 @@ namespace RRT
 
         private BoardData? _currentBoardData;
         private bool _suppressComponentHighlightUpdate;
+        private ComponentInfoWindow? _singleComponentInfoWindow;
+        private readonly Dictionary<string, ComponentInfoWindow> _componentInfoWindowsByKey = new(StringComparer.OrdinalIgnoreCase);
 
         public Main()
         {
@@ -135,17 +138,14 @@ namespace RRT
 
             var assembly = Assembly.GetExecutingAssembly();
             var version = assembly.GetName().Version;
-            var versionString = version != null
-                ? $"{version.Major}.{version.Minor}.{version.Build}"
-                : null;
+            var hasVersion = version != null;
+            var versionString = AppConfig.GetDisplayVersion(version);
 
-            this.AppVersionText.Text = versionString != null
-                ? $"Version {versionString}"
-                : "Version (unknown)";
+            this.AppVersionText.Text = $"Version {versionString}";
 
-            this.PopulateAboutTab(assembly, versionString);
+            this.PopulateAboutTab(assembly, hasVersion ? versionString : null);
 
-            this.Title = versionString != null
+            this.Title = hasVersion
                 ? $"Retro Repair Toolbox {versionString}"
                 : "Retro Repair Toolbox";
 
@@ -157,12 +157,20 @@ namespace RRT
             this.ThemeToggleSwitch.IsChecked = isDark;
             this.ThemeToggleSwitch.IsCheckedChanged += this.OnThemeToggleSwitchChanged;
 
+            this.MultipleInstancesForComponentPopupToggleSwitch.IsChecked = UserSettings.MultipleInstancesForComponentPopup;
+            this.MultipleInstancesForComponentPopupToggleSwitch.IsCheckedChanged += this.OnMultipleInstancesForComponentPopupChanged;
+
+            this.MaximizeComponentPopupToggleSwitch.IsChecked = UserSettings.MaximizeComponentPopup;
+            this.MaximizeComponentPopupToggleSwitch.IsCheckedChanged += this.OnMaximizeComponentPopupChanged;
+
             // Initialize configuration checkboxes — subscribe after setting initial values
             // to avoid triggering redundant saves during startup
             this.CheckVersionOnLaunchCheckBox.IsChecked = UserSettings.CheckVersionOnLaunch;
             this.CheckDataOnLaunchCheckBox.IsChecked = UserSettings.CheckDataOnLaunch;
             this.CheckVersionOnLaunchCheckBox.IsCheckedChanged += this.OnCheckVersionOnLaunchChanged;
             this.CheckDataOnLaunchCheckBox.IsCheckedChanged += this.OnCheckDataOnLaunchChanged;
+
+            this.SchematicsContainer.PointerExited += this.OnSchematicsPointerExited;
 
             if (UserSettings.CheckVersionOnLaunch)
             {
@@ -584,7 +592,7 @@ namespace RRT
             this.SchematicsHighlightsOverlay.ViewMatrix = this._schematicsMatrix;
 
             this._isPanning = false;
-            this.SchematicsContainer.Cursor = Cursor.Default;
+            this.HideSchematicsHoverUi();
         }
 
         // ###########################################################################################
@@ -800,19 +808,45 @@ namespace RRT
         }
 
         // ###########################################################################################
-        // Enters pan mode when the right mouse button is pressed.
+        // Handles right-click deselection on hovered component; otherwise right-click starts panning.
+        // Left-click selects hovered component, and single-click opens the component info popup.
+        // Double-click currently has no extra functionality.
         // ###########################################################################################
         private void OnSchematicsPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (!e.GetCurrentPoint(this.SchematicsContainer).Properties.IsRightButtonPressed)
-                return;
+            var point = e.GetPosition(this.SchematicsContainer);
+            var pointer = e.GetCurrentPoint(this.SchematicsContainer);
 
-            this._isPanning = true;
-            this._panStartPoint = e.GetPosition(this.SchematicsContainer);
-            this._panStartMatrix = this._schematicsMatrix;
-            this.SchematicsContainer.Cursor = new Cursor(StandardCursorType.SizeAll);
-            e.Pointer.Capture(this.SchematicsContainer);
-            e.Handled = true;
+            if (pointer.Properties.IsRightButtonPressed)
+            {
+                if (this.TryGetHoveredBoardLabel(point, out var hoveredBoardLabel, out _))
+                {
+                    this.DeselectComponentByBoardLabel(hoveredBoardLabel);
+                    this.UpdateSchematicsHoverUi(point);
+                    e.Handled = true;
+                    return;
+                }
+
+                this._isPanning = true;
+                this._panStartPoint = point;
+                this._panStartMatrix = this._schematicsMatrix;
+                this.SchematicsContainer.Cursor = new Cursor(StandardCursorType.SizeAll);
+                this.HideSchematicsHoverUi();
+                e.Pointer.Capture(this.SchematicsContainer);
+                e.Handled = true;
+                return;
+            }
+
+            if (pointer.Properties.IsLeftButtonPressed &&
+                this.TryGetHoveredBoardLabel(point, out var boardLabel, out var displayText))
+            {
+                this.SelectComponentByBoardLabel(boardLabel);
+
+                if (e.ClickCount == 1)
+                    this.OpenComponentInfoPopup(boardLabel, displayText);
+
+                e.Handled = true;
+            }
         }
 
         // ###########################################################################################
@@ -820,13 +854,18 @@ namespace RRT
         // ###########################################################################################
         private void OnSchematicsPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (!this._isPanning)
-                return;
+            var point = e.GetPosition(this.SchematicsContainer);
 
-            var delta = e.GetPosition(this.SchematicsContainer) - this._panStartPoint;
-            this._schematicsMatrix = this._panStartMatrix * Matrix.CreateTranslation(delta.X, delta.Y);
-            this.ClampSchematicsMatrix();
-            e.Handled = true;
+            if (this._isPanning)
+            {
+                var delta = point - this._panStartPoint;
+                this._schematicsMatrix = this._panStartMatrix * Matrix.CreateTranslation(delta.X, delta.Y);
+                this.ClampSchematicsMatrix();
+                e.Handled = true;
+                return;
+            }
+
+            this.UpdateSchematicsHoverUi(point);
         }
 
         // ###########################################################################################
@@ -838,8 +877,8 @@ namespace RRT
                 return;
 
             this._isPanning = false;
-            this.SchematicsContainer.Cursor = Cursor.Default;
             e.Pointer.Capture(null);
+            this.UpdateSchematicsHoverUi(e.GetPosition(this.SchematicsContainer));
             e.Handled = true;
         }
 
@@ -1035,6 +1074,22 @@ namespace RRT
             }
 
             UserSettings.ThemeVariant = isDark ? "Dark" : "Light";
+        }
+
+        // ###########################################################################################
+        // Persists the "Multiple instances for component popup" preference when the toggle is changed.
+        // ###########################################################################################
+        private void OnMultipleInstancesForComponentPopupChanged(object? sender, RoutedEventArgs e)
+        {
+            UserSettings.MultipleInstancesForComponentPopup = this.MultipleInstancesForComponentPopupToggleSwitch.IsChecked == true;
+        }
+
+        // ###########################################################################################
+        // Persists the "Maximize component popup" preference when the toggle is changed.
+        // ###########################################################################################
+        private void OnMaximizeComponentPopupChanged(object? sender, RoutedEventArgs e)
+        {
+            UserSettings.MaximizeComponentPopup = this.MaximizeComponentPopupToggleSwitch.IsChecked == true;
         }
 
         // ###########################################################################################
@@ -1603,6 +1658,304 @@ namespace RRT
             this.UpdateHighlightsForComponents(survivingLabels);
         }
 
+        // ###########################################################################################
+        // Clears hover label and resets schematic cursor.
+        // ###########################################################################################
+        private void HideSchematicsHoverUi()
+        {
+            this.SchematicsHoverLabelBorder.IsVisible = false;
+            this.SchematicsHoverLabelText.Text = string.Empty;
+            this.SchematicsContainer.Cursor = Cursor.Default;
+        }
+
+        // ###########################################################################################
+        // Clears hover UI when pointer exits schematic area.
+        // ###########################################################################################
+        private void OnSchematicsPointerExited(object? sender, PointerEventArgs e)
+        {
+            if (this._isPanning)
+                return;
+
+            this.HideSchematicsHoverUi();
+        }
+
+        // ###########################################################################################
+        // Updates hover label/cursor from current pointer position.
+        // ###########################################################################################
+        private void UpdateSchematicsHoverUi(Point pointerInContainer)
+        {
+            if (this.TryGetHoveredBoardLabel(pointerInContainer, out _, out var displayText))
+            {
+                this.SchematicsContainer.Cursor = new Cursor(StandardCursorType.Hand);
+                this.SchematicsHoverLabelText.Text = displayText;
+                this.SchematicsHoverLabelBorder.IsVisible = true;
+                return;
+            }
+
+            this.HideSchematicsHoverUi();
+        }
+
+        // ###########################################################################################
+        // Resolves hovered board label and the exact text shown in component selector.
+        // Includes components that are visible in the selector even when not selected/highlighted.
+        // ###########################################################################################
+        private bool TryGetHoveredBoardLabel(Point pointerInContainer, out string boardLabel, out string displayText)
+        {
+            boardLabel = string.Empty;
+            displayText = string.Empty;
+
+            if (this._currentFullResBitmap == null)
+                return false;
+
+            var selectedThumb = this.SchematicsThumbnailList.SelectedItem as SchematicThumbnail;
+            if (selectedThumb == null)
+                return false;
+
+            if (!this._highlightRectsBySchematicAndLabel.TryGetValue(selectedThumb.Name, out var byLabel))
+                return false;
+
+            if (!TryInvert(this._schematicsMatrix, out var inv))
+                return false;
+
+            var localPoint = new Point(
+                (pointerInContainer.X * inv.M11) + (pointerInContainer.Y * inv.M21) + inv.M31,
+                (pointerInContainer.X * inv.M12) + (pointerInContainer.Y * inv.M22) + inv.M32);
+
+            var contentRect = this.GetImageContentRect();
+            if (contentRect.Width <= 0 || contentRect.Height <= 0 || !contentRect.Contains(localPoint))
+                return false;
+
+            double px = ((localPoint.X - contentRect.X) / contentRect.Width) * this._currentFullResBitmap.PixelSize.Width;
+            double py = ((localPoint.Y - contentRect.Y) / contentRect.Height) * this._currentFullResBitmap.PixelSize.Height;
+            var pixelPoint = new Point(px, py);
+
+            // Use all currently visible component rows (not only selected rows).
+            var visibleItems = this.ComponentFilterListBox.ItemsSource?.Cast<ComponentListItem>().ToList() ?? [];
+            var seenLabels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in visibleItems)
+            {
+                if (string.IsNullOrWhiteSpace(item.BoardLabel))
+                    continue;
+
+                if (!seenLabels.Add(item.BoardLabel))
+                    continue;
+
+                if (!byLabel.TryGetValue(item.BoardLabel, out var rects))
+                    continue;
+
+                if (!rects.Any(r => r.Contains(pixelPoint)))
+                    continue;
+
+                boardLabel = item.BoardLabel;
+                displayText = item.DisplayText;
+                return true;
+            }
+
+            return false;
+        }
+
+        // ###########################################################################################
+        // Selects first component row matching board label and scrolls it into view.
+        // ###########################################################################################
+        private void SelectComponentByBoardLabel(string boardLabel)
+        {
+            var items = this.ComponentFilterListBox.ItemsSource?.Cast<ComponentListItem>().ToList() ?? [];
+            int index = items.FindIndex(i => string.Equals(i.BoardLabel, boardLabel, StringComparison.OrdinalIgnoreCase));
+            if (index < 0)
+                return;
+
+            this.ComponentFilterListBox.Selection.Select(index);
+            this.ComponentFilterListBox.ScrollIntoView(items[index]);
+        }
+
+        // ###########################################################################################
+        // Tries to invert a 2D affine matrix.
+        // ###########################################################################################
+        private static bool TryInvert(Matrix m, out Matrix inv)
+        {
+            double a = m.M11, b = m.M12, c = m.M21, d = m.M22, e = m.M31, f = m.M32;
+            double det = (a * d) - (b * c);
+
+            if (Math.Abs(det) < 1e-12)
+            {
+                inv = Matrix.Identity;
+                return false;
+            }
+
+            double idet = 1.0 / det;
+
+            double na = d * idet;
+            double nb = -b * idet;
+            double nc = -c * idet;
+            double nd = a * idet;
+
+            double ne = -((e * na) + (f * nc));
+            double nf = -((e * nb) + (f * nd));
+
+            inv = new Matrix(na, nb, nc, nd, ne, nf);
+            return true;
+        }
+
+        // ###########################################################################################
+        // Deselects all component rows that match the given board label.
+        // ###########################################################################################
+        private void DeselectComponentByBoardLabel(string boardLabel)
+        {
+            var items = this.ComponentFilterListBox.ItemsSource?.Cast<ComponentListItem>().ToList() ?? [];
+            if (items.Count == 0)
+                return;
+
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (string.Equals(items[i].BoardLabel, boardLabel, StringComparison.OrdinalIgnoreCase))
+                    this.ComponentFilterListBox.Selection.Deselect(i);
+            }
+        }
+
+        // ###########################################################################################
+        // Opens a component info popup according to user settings:
+        // - MultipleInstancesForComponentPopup: reuse per-component window (no duplicates) or single window
+        // - MaximizeComponentPopup: maximized or normal window state
+        // ###########################################################################################
+        private void OpenComponentInfoPopup(string boardLabel, string displayText)
+        {
+            string componentKey = $"{boardLabel}\u001F{displayText}";
+
+            if (UserSettings.MultipleInstancesForComponentPopup)
+            {
+                if (!this._componentInfoWindowsByKey.TryGetValue(componentKey, out var popup) || !popup.IsVisible)
+                {
+                    popup = new ComponentInfoWindow();
+                    this._componentInfoWindowsByKey[componentKey] = popup;
+
+                    popup.Closed += (_, _) =>
+                    {
+                        if (this._componentInfoWindowsByKey.TryGetValue(componentKey, out var existing) && ReferenceEquals(existing, popup))
+                            this._componentInfoWindowsByKey.Remove(componentKey);
+                    };
+                }
+
+                popup.SetComponent(boardLabel, displayText);
+                popup.WindowState = UserSettings.MaximizeComponentPopup
+                    ? Avalonia.Controls.WindowState.Maximized
+                    : Avalonia.Controls.WindowState.Normal;
+
+                if (!popup.IsVisible)
+                    popup.Show();
+                else
+                    popup.Activate();
+
+                return;
+            }
+
+            if (this._singleComponentInfoWindow == null)
+            {
+                this._singleComponentInfoWindow = new ComponentInfoWindow();
+                this._singleComponentInfoWindow.Closed += (_, _) => this._singleComponentInfoWindow = null;
+            }
+
+            this._singleComponentInfoWindow.SetComponent(boardLabel, displayText);
+            this._singleComponentInfoWindow.WindowState = UserSettings.MaximizeComponentPopup
+                ? Avalonia.Controls.WindowState.Maximized
+                : Avalonia.Controls.WindowState.Normal;
+
+            if (!this._singleComponentInfoWindow.IsVisible)
+                this._singleComponentInfoWindow.Show();
+            else
+                this._singleComponentInfoWindow.Activate();
+        }
+
+        // ###########################################################################################
+        // Lightweight popup window that shows component information text.
+        // ###########################################################################################
+        // ###########################################################################################
+        // Lightweight popup window that shows component information text.
+        // ###########################################################################################
+        private sealed class ComponentInfoWindow : Window
+        {
+            private readonly TextBlock _titleText;
+            private readonly TextBox _infoText;
+
+            public ComponentInfoWindow()
+            {
+                this.Title = "Component Information";
+                this.Width = 680;
+                this.Height = 420;
+                this.MinWidth = 420;
+                this.MinHeight = 260;
+
+                this._titleText = new TextBlock
+                {
+                    FontSize = 16,
+                    FontWeight = FontWeight.SemiBold,
+                    Margin = new Thickness(0, 0, 0, 8)
+                };
+
+                this._infoText = new TextBox
+                {
+                    IsReadOnly = true,
+                    AcceptsReturn = true,
+                    TextWrapping = TextWrapping.Wrap,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
+                };
+
+                ScrollViewer.SetVerticalScrollBarVisibility(this._infoText, Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
+                ScrollViewer.SetHorizontalScrollBarVisibility(this._infoText, Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
+
+                var infoBorder = new Border
+                {
+                    Padding = new Thickness(8),
+                    Child = this._infoText
+                };
+                Grid.SetRow(infoBorder, 1);
+
+                this.Content = new Grid
+                {
+                    Margin = new Thickness(12),
+                    RowDefinitions = new RowDefinitions("Auto,*"),
+                    Children =
+            {
+                this._titleText,
+                infoBorder
+            }
+                };
+
+                this.KeyDown += (s, e) =>
+                {
+                    if (e.Key == Key.Escape)
+                    {
+                        this.Close();
+                    }
+                };
+            }
+
+            // ###########################################################################################
+            // Updates popup content with the currently targeted component.
+            // ###########################################################################################
+            public void SetComponent(string boardLabel, string displayText)
+            {
+                this._titleText.Text = displayText;
+                this._infoText.Text = $"Board label: {boardLabel}{Environment.NewLine}{Environment.NewLine}{displayText}";
+            }
+        }
+
+
+
+
+
+
+
+
+
 
     }
+
+
+
+
+
+
+
 }

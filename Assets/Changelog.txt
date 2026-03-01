@@ -1,7 +1,16 @@
+The DEVELOPMENT version will most likely keep running on 0.1.x
 
-# 0.1.1, ???
----------
+# 0.1.1, 2026-March-1
+---------------------
+* Fixed splashscreen would show a static text for version
+* Added two checkboxes for component information popup in "Configuration" tab
+* Added hovering on components in "Schematics" tab:
+  - Label will show component name
+  - Click to select component and open component information popup
+  - Right-click to deselect component
+* Changed appearance switch to be a checkbox instead in "Configuration"
 * Various minor UI and text changes
+
 
 # 0.1.0, 2026-February-28
 -------------------------

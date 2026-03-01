@@ -20,6 +20,14 @@ namespace RRT
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public bool? CheckDataOnLaunch { get; set; }
 
+        [JsonPropertyName("multipleInstancesForComponentPopup")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? MultipleInstancesForComponentPopup { get; set; }
+
+        [JsonPropertyName("maximizeComponentPopup")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? MaximizeComponentPopup { get; set; }
+
         [JsonPropertyName("leftPanelWidth")] public double LeftPanelWidth { get; set; } = 200.0;
         [JsonPropertyName("schematicsSplitterRatios")] public Dictionary<string, double> SchematicsSplitterRatios { get; set; } = new();
         [JsonPropertyName("selectedCategoriesByBoard")] public Dictionary<string, List<string>> SelectedCategoriesByBoard { get; set; } = new();
@@ -69,6 +77,28 @@ namespace RRT
             {
                 _data.CheckDataOnLaunch = value;
                 Logger.Info($"Setting changed - [CheckDataOnLaunch] [{value}]");
+                Save();
+            }
+        }
+
+        public static bool MultipleInstancesForComponentPopup
+        {
+            get => _data.MultipleInstancesForComponentPopup ?? false;
+            set
+            {
+                _data.MultipleInstancesForComponentPopup = value;
+                Logger.Info($"Setting changed - [MultipleInstancesForComponentPopup] [{value}]");
+                Save();
+            }
+        }
+
+        public static bool MaximizeComponentPopup
+        {
+            get => _data.MaximizeComponentPopup ?? false;
+            set
+            {
+                _data.MaximizeComponentPopup = value;
+                Logger.Info($"Setting changed - [MaximizeComponentPopup] [{value}]");
                 Save();
             }
         }

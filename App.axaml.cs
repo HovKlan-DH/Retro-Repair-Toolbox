@@ -104,6 +104,18 @@ namespace RRT
         // Used by: App.OnFrameworkInitializationCompleted to center the splash on the saved screen.
         public const int SplashWidth = 600;
         public const int SplashHeight = 350;
+
+        // ###########################################################################################
+        // Builds a display-safe semantic version string in Major.Minor.Build format.
+        // Returns "(unknown)" when version metadata is not available.
+        // ###########################################################################################
+        public static string GetDisplayVersion(Version? version)
+        {
+            return version != null
+                ? $"{version.Major}.{version.Minor}.{version.Build}"
+                : "(unknown)";
+        }
+
     }
 
     public partial class App : Application
@@ -130,8 +142,10 @@ namespace RRT
                 this.RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Default;
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var versionString = AppConfig.GetDisplayVersion(version);
+
             Logger.Info(version != null
-                ? $"Retro Repair Toolbox version [{version.Major}.{version.Minor}.{version.Build}] launched"
+                ? $"Retro Repair Toolbox version [{versionString}] launched"
                 : "Retro Repair Toolbox launched");
 
             var os = RuntimeInformation.OSDescription;
@@ -182,5 +196,9 @@ namespace RRT
 
             base.OnFrameworkInitializationCompleted();
         }
+
+
     }
+
+
 }

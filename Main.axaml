@@ -405,8 +405,7 @@
                                 PointerPressed="OnSchematicsPointerPressed"
                                 PointerMoved="OnSchematicsPointerMoved"
                                 PointerReleased="OnSchematicsPointerReleased"
-                                Padding="0,0,0,0"
-                                >
+                                Padding="0,0,0,0">
                             <Grid>
                                 <Image x:Name="SchematicsImage"
                                        Stretch="Uniform"
@@ -418,13 +417,30 @@
                                         <MatrixTransform />
                                     </Image.RenderTransform>
                                 </Image>
+
                                 <local:SchematicHighlightsOverlay x:Name="SchematicsHighlightsOverlay"
-                                                                 IsHitTestVisible="False"
-                                                                 RenderTransformOrigin="0%,0%">
+                                                                  IsHitTestVisible="False"
+                                                                  RenderTransformOrigin="0%,0%">
                                     <local:SchematicHighlightsOverlay.RenderTransform>
                                         <MatrixTransform />
                                     </local:SchematicHighlightsOverlay.RenderTransform>
                                 </local:SchematicHighlightsOverlay>
+
+                                <Border x:Name="SchematicsHoverLabelBorder"
+                                        IsVisible="False"
+                                        IsHitTestVisible="False"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Margin="10,10,0,0"
+                                        Background="{DynamicResource AppThemeThumbLabelBackgroundBrush}"
+                                        BorderBrush="{DynamicResource AppThemeBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,4">
+                                    <TextBlock x:Name="SchematicsHoverLabelText"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource AppThemeTextBrush}" />
+                                </Border>
                             </Grid>
                         </Border>
 
@@ -533,41 +549,51 @@
                 </TabItem>
 
                 <TabItem Header="Configuration">
-                    <StackPanel Spacing="8"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Margin="16">
+                     <StackPanel Spacing="8"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top"
+                                 Margin="16">
 
-                        <TextBlock Text="Appearance"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,4" />
+                         <TextBlock Text="Appearance"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Margin="0,0,0,4" />
 
-                        <ToggleSwitch x:Name="ThemeToggleSwitch"
-                                      OffContent="Light Theme"
-                                      OnContent="Dark Theme" />
+                         <CheckBox x:Name="ThemeToggleSwitch"
+                                   Content="Use dark theme" />
 
-                        <TextBlock Text="Application Launch"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Margin="0,16,0,4" />
+                         <TextBlock Text="Component Information Popup"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Margin="0,16,0,4" />
 
-                        <CheckBox x:Name="CheckVersionOnLaunchCheckBox"
+                         <CheckBox x:Name="MultipleInstancesForComponentPopupToggleSwitch"
+                                   Content="Open multiple windows for popup" />
+
+                         <CheckBox x:Name="MaximizeComponentPopupToggleSwitch"
+                                   Content="Open popup in maximized mode" />
+
+                         <TextBlock Text="Application Launch"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Margin="0,16,0,4" />
+
+                         <CheckBox x:Name="CheckVersionOnLaunchCheckBox"
                                   Content="Check for new version at application launch" />
 
-                            <CheckBox x:Name="CheckDataOnLaunchCheckBox"
-                                      Content="Check for new or updated data at application launch" />
+                         <CheckBox x:Name="CheckDataOnLaunchCheckBox"
+                                   Content="Check for new or updated data at application launch" />
 
-                            <Button x:Name="OpenAppDataFolderButton"
-                                    Content="Open data/log/settings folder"
-                                    Margin="0,8,0,0"
-                                    HorizontalAlignment="Left"
-                                    Click="OnOpenAppDataFolderClick" />
+                         <Button x:Name="OpenAppDataFolderButton"
+                                 Content="Open data/log/settings folder"
+                                 Margin="0,8,0,0"
+                                 HorizontalAlignment="Left"
+                                 Click="OnOpenAppDataFolderClick" />
 
-                        </StackPanel>
-                    </TabItem>
+                     </StackPanel>
+                 </TabItem>
 
-                    <TabItem Header="Feedback">
+                   <TabItem Header="Feedback">
                         <TextBlock Text="Details content goes here"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />

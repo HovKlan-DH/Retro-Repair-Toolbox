@@ -28,12 +28,16 @@
                        HorizontalAlignment="Center" />
             
             <TextBlock x:Name="VersionLabel"
-                       Text="Version 1.0.0"
                        FontSize="12"
                        Foreground="{DynamicResource AppThemeTextBrush}"
                        Opacity="0.7"
                        HorizontalAlignment="Center" 
-                       Margin="0,-4,0,16" />
+                       Margin="0,-4,0,16">
+                <Run Text="Version " />
+                <Run x:Name="VersionNumberRun"
+                     Text="(unknown)"
+                     FontWeight="Bold" />
+            </TextBlock>
 
             <TextBlock x:Name="StatusLabel"
                        Text="Loading, please wait..."
