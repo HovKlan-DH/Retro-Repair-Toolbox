@@ -12,11 +12,11 @@ on:
         default: '0.1.0'
 
 env:
-  PACK_ID: Retro-Repair-Toolbox
-  EXE_WINDOWS: Retro-Repair-Toolbox.exe
-  EXE_UNIX: Retro-Repair-Toolbox
-  PROJECT: Retro-Repair-Toolbox.csproj
-  DATA_PACK_URL: https://retro-repair-toolbox.dk/app-data/Data.zip
+  PACK_ID: Classic-Repair-Toolbox
+  EXE_WINDOWS: Classic-Repair-Toolbox.exe
+  EXE_UNIX: Classic-Repair-Toolbox
+  PROJECT: Classic-Repair-Toolbox.csproj
+  DATA_PACK_URL: https://classic-repair-toolbox.dk/app-data/Data.zip
 
 jobs:
 
@@ -81,7 +81,7 @@ jobs:
             --packDir publish/windows-x64 `
             --mainExe ${{ env.EXE_WINDOWS }} `
             --noPortable `
-            --icon "Assets/RRT_icon.ico" `
+            --icon "Assets/CRT_icon.ico" `
             --outputDir velopack-output
 
       - name: Sign Velopack installer
@@ -151,7 +151,7 @@ jobs:
             --packVersion ${{ steps.ver.outputs.version }} \
             --packDir publish/linux-x64 \
             --mainExe ${{ env.EXE_UNIX }} \
-            --icon "Assets/RRT_icon.ico" \
+            --icon "Assets/CRT_icon.ico" \
             --outputDir velopack-output
 
       - name: Upload Velopack artifacts
@@ -220,7 +220,7 @@ jobs:
             --mainExe ${{ env.EXE_UNIX }} \
             --channel osx-arm64 \
             --noPortable \
-            --icon "Assets/RRT_icon.icns" \
+            --icon "Assets/CRT_icon.icns" \
             --outputDir velopack-output
 
       - name: Pack with Velopack (macOS x64)
@@ -232,7 +232,7 @@ jobs:
             --mainExe ${{ env.EXE_UNIX }} \
             --channel osx-x64 \
             --noPortable \
-            --icon "Assets/RRT_icon.icns" \
+            --icon "Assets/CRT_icon.icns" \
             --outputDir velopack-output
 
       - name: Upload Velopack artifacts
@@ -270,19 +270,19 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: "DEVELOPMENT - Retro Repair Toolbox ${{ steps.tag.outputs.tag }}"
+          name: "DEVELOPMENT - Classic Repair Toolbox ${{ steps.tag.outputs.tag }}"
           body: |
-            **Retro Repair Toolbox** is identical to [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox), but this new project will natively support **Windows**, **Linux** and **macOS**. There will be many development-releases until the final version will be named **1.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
+            **Classic Repair Toolbox** is identical to [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox), but this new project will natively support **Windows**, **Linux** and **macOS**. There will be many development-releases until the final version will be named **1.0.0**. Please support by giving your comments, if this works or not, and what needs improvement.
 
-            You only need to install the **Retro Repair Toolbox** application once, and thereafter you can update directly from inside the application.
+            You only need to install the **Classic Repair Toolbox** application once, and thereafter you can update directly from inside the application.
 
             ### Direct downloads for different platforms
             | Platform | File |
             |----------|------|
-            | Windows x64 | [Retro-Repair-Toolbox-win-Setup.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-win-Setup.exe) |
-            | Linux x64 | [Retro-Repair-Toolbox.AppImage](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox.AppImage) |
-            | macOS arm64 Apple Silicon | [Retro-Repair-Toolbox-osx-arm64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-osx-arm64-Setup.pkg) |
-            | macOS x64 Intel | [Retro-Repair-Toolbox-osx-x64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Retro-Repair-Toolbox-osx-x64-Setup.pkg) |
+            | Windows x64 | [Classic-Repair-Toolbox-win-Setup.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Classic-Repair-Toolbox-win-Setup.exe) |
+            | Linux x64 | [Classic-Repair-Toolbox.AppImage](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Classic-Repair-Toolbox.AppImage) |
+            | macOS arm64 Apple Silicon | [Classic-Repair-Toolbox-osx-arm64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Classic-Repair-Toolbox-osx-arm64-Setup.pkg) |
+            | macOS x64 Intel | [Classic-Repair-Toolbox-osx-x64-Setup.pkg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Classic-Repair-Toolbox-osx-x64-Setup.pkg) |
           draft: false
           prerelease: true
           files: |
