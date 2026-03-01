@@ -57,11 +57,11 @@ namespace RRT
         public const string ChecksumsUrl = "https://retro-repair-toolbox.dk/app-data/dataChecksums.json";
 
         // URL for the phone-home version check endpoint.
-        // Used by: OnlineServices.CheckVersionAsync
+        // Used by: OnlineServices.CheckInVersionAsync
         public const string CheckVersionUrl = "https://retro-repair-toolbox.dk/app-checkin/";
 
         // Timeout for lightweight API calls (manifest fetch, version check).
-        // Used by: OnlineServices.FetchManifestAsync, OnlineServices.CheckVersionAsync
+        // Used by: OnlineServices.FetchManifestAsync, OnlineServices.CheckInVersionAsync
         public static readonly TimeSpan ApiTimeout = TimeSpan.FromSeconds(5);
 
         // Timeout per individual file download — files can be large on slow connections.
@@ -176,10 +176,8 @@ namespace RRT
 
                 Logger.Info("Main window opened");
 
-                if (UserSettings.CheckVersionOnLaunch)
-                {
-                    _ = OnlineServices.CheckVersionAsync();
-                }
+                // UI has finished loading, so we can do a check-in
+                _ = OnlineServices.CheckInVersionAsync();
             }
 
             base.OnFrameworkInitializationCompleted();

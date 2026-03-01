@@ -35,7 +35,7 @@ namespace RRT
         // Asks server for newest version.
         // Reports the app version and OS details. Runs silently - failures are only logged.
         // ###########################################################################################
-        public static async Task CheckVersionAsync()
+        public static async Task CheckInVersionAsync()
         {
             try
             {

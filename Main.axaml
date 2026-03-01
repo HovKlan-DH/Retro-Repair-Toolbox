@@ -271,18 +271,18 @@
                 </Grid>
 
                 <!-- View options -->
-                <Grid ColumnDefinitions="*,8,Auto">
+                <Grid ColumnDefinitions="*,4,*">
                     <Button Grid.Column="0"
-                            Content="Fullscreen" 
-                            HorizontalAlignment="Stretch" 
+                            Content="Fullscreen"
+                            HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             FontSize="12"
                             Padding="4" />
 
                     <CheckBox Grid.Column="2"
-                              Content="Blink selected" 
+                              Content="Blink selected"
+                              HorizontalAlignment="Left"
                               FontSize="12"
-                              Padding="4,0,0,0"
                               VerticalAlignment="Center" />
                 </Grid>
             </StackPanel>
