@@ -58,6 +58,11 @@ namespace CRT
         private ComponentInfoWindow? _singleComponentInfoWindow;
         private readonly Dictionary<string, ComponentInfoWindow> _componentInfoWindowsByKey = new(StringComparer.OrdinalIgnoreCase);
 
+        // Blink selected highlights
+        private DispatcherTimer? _blinkSelectedTimer;
+        private bool _blinkSelectedPhaseVisible = true;
+        private bool _blinkSelectedEnabled;
+
         public Main()
         {
             InitializeComponent();
@@ -87,6 +92,10 @@ namespace CRT
             _restoreWidth = Math.Max(this.MinWidth, UserSettings.WindowWidth);
             _restoreHeight = Math.Max(this.MinHeight, UserSettings.WindowHeight);
             _restorePosition = new PixelPoint(UserSettings.WindowX, UserSettings.WindowY);
+
+            // Wireup "blink" button
+            this.BlinkSelectedCheckBox.IsChecked = false;
+            this.BlinkSelectedCheckBox.IsCheckedChanged += this.OnBlinkSelectedChanged;
 
             if (UserSettings.HasWindowPlacement)
             {
@@ -127,7 +136,6 @@ namespace CRT
                     this.ClampSchematicsMatrix();
             };
 
-            this.SubscribePanelSizeChanges();
             this.UpdateRegionButtonsState();
             this.HardwareComboBox.SelectionChanged += this.OnHardwareSelectionChanged;
             this.BoardComboBox.SelectionChanged += this.OnBoardSelectionChanged;
@@ -259,24 +267,6 @@ namespace CRT
                 Dispatcher.UIThread.Post(() => this.UpdateBannerText.Text = $"Downloading update... {progress}%");
             });
             // DownloadAndInstallAsync calls ApplyUpdatesAndRestart internally - app relaunches automatically
-        }
-
-        // ###########################################################################################
-        // Subscribes to Bounds property changes on each panel to update the size labels in real-time.
-        // ###########################################################################################
-        private void SubscribePanelSizeChanges()
-        {
-            this.LeftPanel.PropertyChanged += (s, e) =>
-            {
-                if (e.Property == Visual.BoundsProperty)
-                    this.LeftSizeLabel.Text = $"{this.LeftPanel.Bounds.Width:F0} × {this.LeftPanel.Bounds.Height:F0}";
-            };
-
-            this.RightPanel.PropertyChanged += (s, e) =>
-            {
-                if (e.Property == Visual.BoundsProperty)
-                    this.RightSizeLabel.Text = $"{this.RightPanel.Bounds.Width:F0} × {this.RightPanel.Bounds.Height:F0}";
-            };
         }
 
         // ###########################################################################################
@@ -718,8 +708,8 @@ namespace CRT
         // Composites highlight rectangles onto a base thumbnail and returns the new rendered bitmap.
         // ###########################################################################################
         private static RenderTargetBitmap CreateHighlightedThumbnail(
-            IImage baseThumbnail, PixelSize originalPixelSize,
-            HighlightSpatialIndex index, BoardSchematicEntry schematic)
+    IImage baseThumbnail, PixelSize originalPixelSize,
+    HighlightSpatialIndex index, BoardSchematicEntry schematic, double opacityMultiplier = 1.0)
         {
             int tw = 1, th = 1;
             if (baseThumbnail is RenderTargetBitmap rtb)
@@ -749,7 +739,7 @@ namespace CRT
                 BitmapPixelSize = originalPixelSize,
                 ViewMatrix = Matrix.Identity,
                 HighlightColor = ParseColorOrDefault(schematic.ThumbnailImageHighlightColor, Colors.IndianRed),
-                HighlightOpacity = ParseOpacityOrDefault(schematic.ThumbnailHighlightOpacity, 0.20),
+                HighlightOpacity = ParseOpacityOrDefault(schematic.ThumbnailHighlightOpacity, 0.20) * Math.Clamp(opacityMultiplier, 0.0, 1.0),
                 IsHitTestVisible = false
             };
 
@@ -762,14 +752,6 @@ namespace CRT
             var result = new RenderTargetBitmap(new PixelSize(tw, th), new Vector(96, 96));
             result.Render(root);
             return result;
-        }
-
-        // ###########################################################################################
-        // Handles the button click event and updates the status text.
-        // ###########################################################################################
-        private void OnMyButtonClick(object sender, RoutedEventArgs e)
-        {
-            this.StatusText.Text = "Button was clicked!";
         }
 
         // ###########################################################################################
@@ -890,20 +872,27 @@ namespace CRT
         // ###########################################################################################
         private static Dictionary<string, Dictionary<string, List<Rect>>> BuildHighlightRects(BoardData boardData, string region)
         {
-            var componentRegionByLabel = boardData.Components
+            var componentRegionsByLabel = boardData.Components
                 .Where(c => !string.IsNullOrWhiteSpace(c.BoardLabel))
                 .GroupBy(c => c.BoardLabel, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().Region ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(c => c.Region?.Trim() ?? string.Empty)
+                          .Where(r => !string.IsNullOrWhiteSpace(r))
+                          .Distinct(StringComparer.OrdinalIgnoreCase)
+                          .ToList(),
+                    StringComparer.OrdinalIgnoreCase);
 
             bool IsVisibleByRegion(string boardLabel)
             {
-                if (!componentRegionByLabel.TryGetValue(boardLabel, out var r))
+                if (!componentRegionsByLabel.TryGetValue(boardLabel, out var regionsForLabel))
                     return true;
 
-                if (string.IsNullOrWhiteSpace(r))
+                // Empty region means "visible in all regions".
+                if (regionsForLabel.Count == 0)
                     return true;
 
-                return string.Equals(r.Trim(), region, StringComparison.OrdinalIgnoreCase);
+                return regionsForLabel.Any(r => string.Equals(r, region, StringComparison.OrdinalIgnoreCase));
             }
 
             var result = new Dictionary<string, Dictionary<string, List<Rect>>>(StringComparer.OrdinalIgnoreCase);
@@ -961,9 +950,9 @@ namespace CRT
             this.UpdateHighlightsForComponents(boardLabels);
         }
 
-        /// ###########################################################################################
-        // Rebuilds highlight indices from the selected board labels, updates the main schematic
-        // viewer overlay, and regenerates or restores all thumbnails accordingly.
+        // ###########################################################################################
+        // Rebuilds highlight indices from the selected board labels, then applies highlight visuals
+        // to the main schematic and all thumbnails. Also updates blink timer state.
         // ###########################################################################################
         private void UpdateHighlightsForComponents(List<string> boardLabels)
         {
@@ -986,61 +975,9 @@ namespace CRT
                 }
             }
 
-            // Update main viewer overlay for the currently displayed schematic
-            var selectedThumb = this.SchematicsThumbnailList.SelectedItem as SchematicThumbnail;
-            if (selectedThumb != null &&
-                this._highlightIndexBySchematic.TryGetValue(selectedThumb.Name, out var mainIndex) &&
-                this._schematicByName.TryGetValue(selectedThumb.Name, out var mainSchematic))
-            {
-                this.SchematicsHighlightsOverlay.HighlightIndex = mainIndex;
-                this.SchematicsHighlightsOverlay.BitmapPixelSize = this._currentFullResBitmap?.PixelSize ?? new PixelSize(0, 0);
-                this.SchematicsHighlightsOverlay.HighlightColor = ParseColorOrDefault(mainSchematic.MainImageHighlightColor, Colors.IndianRed);
-                this.SchematicsHighlightsOverlay.HighlightOpacity = ParseOpacityOrDefault(mainSchematic.MainHighlightOpacity, 0.20);
-            }
-            else
-            {
-                this.SchematicsHighlightsOverlay.HighlightIndex = null;
-            }
-            this.SchematicsHighlightsOverlay.InvalidateVisual();
-
             bool hasSelection = boardLabels.Count > 0;
-
-            // Regenerate thumbnails that have matching highlights; restore others to base
-            foreach (var thumb in this._currentThumbnails)
-            {
-                if (thumb.BaseThumbnail == null)
-                    continue;
-
-                bool hasMatch = false;
-
-                if (this._highlightIndexBySchematic.TryGetValue(thumb.Name, out var thumbIndex) &&
-                    this._schematicByName.TryGetValue(thumb.Name, out var thumbSchematic))
-                {
-                    hasMatch = true;
-                    var highlighted = CreateHighlightedThumbnail(thumb.BaseThumbnail, thumb.OriginalPixelSize, thumbIndex, thumbSchematic);
-                    var old = thumb.ImageSource;
-                    thumb.ImageSource = highlighted;
-                    if (!ReferenceEquals(old, thumb.BaseThumbnail))
-                        (old as IDisposable)?.Dispose();
-                }
-                else
-                {
-                    if (!ReferenceEquals(thumb.ImageSource, thumb.BaseThumbnail))
-                    {
-                        var old = thumb.ImageSource;
-                        thumb.ImageSource = thumb.BaseThumbnail;
-                        (old as IDisposable)?.Dispose();
-                    }
-                }
-
-                bool isRelevantForDimming = !hasSelection || hasMatch;
-
-                // Dim thumbnails that are not relevant to the current multi-selection.
-                thumb.VisualOpacity = isRelevantForDimming ? 1.0 : 0.35;
-
-                // Label accent only when there is an active selection and this thumbnail matches it.
-                thumb.IsMatchForSelection = hasSelection && hasMatch;
-            }
+            this.ApplyHighlightVisuals(hasSelection);
+            this.UpdateBlinkTimer(hasSelection);
         }
 
         // ###########################################################################################
@@ -1346,6 +1283,7 @@ namespace CRT
         // ###########################################################################################
         private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
         {
+            this._blinkSelectedTimer?.Stop();
             _windowPlacementSaveTimer?.Stop();
             this.CommitWindowPlacement();
         }
@@ -1975,6 +1913,141 @@ namespace CRT
             this.SelectComponentByBoardLabel(boardLabel);
         }
 
+        // ###########################################################################################
+        // Handles "Blink selected" checkbox changes and refreshes highlight visuals immediately.
+        // ###########################################################################################
+        private void OnBlinkSelectedChanged(object? sender, RoutedEventArgs e)
+        {
+            this._blinkSelectedEnabled = this.BlinkSelectedCheckBox.IsChecked == true;
+
+            bool hasSelection = this._highlightIndexBySchematic.Count > 0;
+
+            if (this._blinkSelectedEnabled && hasSelection)
+            {
+                // Start with hidden highlights immediately (no initial delay).
+                this._blinkSelectedPhaseVisible = false;
+                this.ApplyHighlightVisuals(true);
+                this.UpdateBlinkTimer(true);
+                return;
+            }
+
+            // When disabled (or no selection), force visible state and stop blinking.
+            this._blinkSelectedPhaseVisible = true;
+            this.UpdateBlinkTimer(hasSelection);
+            this.ApplyHighlightVisuals(hasSelection);
+        }
+
+        // ###########################################################################################
+        // Applies current highlight visuals (including blink phase) to main schematic and thumbnails.
+        // ###########################################################################################
+        private void ApplyHighlightVisuals(bool hasSelection)
+        {
+            double blinkFactor = this.GetCurrentBlinkFactor(hasSelection);
+
+            var selectedThumb = this.SchematicsThumbnailList.SelectedItem as SchematicThumbnail;
+            if (selectedThumb != null &&
+                this._highlightIndexBySchematic.TryGetValue(selectedThumb.Name, out var mainIndex) &&
+                this._schematicByName.TryGetValue(selectedThumb.Name, out var mainSchematic))
+            {
+                this.SchematicsHighlightsOverlay.HighlightIndex = mainIndex;
+                this.SchematicsHighlightsOverlay.BitmapPixelSize = this._currentFullResBitmap?.PixelSize ?? new PixelSize(0, 0);
+                this.SchematicsHighlightsOverlay.HighlightColor = ParseColorOrDefault(mainSchematic.MainImageHighlightColor, Colors.IndianRed);
+                this.SchematicsHighlightsOverlay.HighlightOpacity = ParseOpacityOrDefault(mainSchematic.MainHighlightOpacity, 0.20) * blinkFactor;
+            }
+            else
+            {
+                this.SchematicsHighlightsOverlay.HighlightIndex = null;
+            }
+
+            this.SchematicsHighlightsOverlay.InvalidateVisual();
+
+            foreach (var thumb in this._currentThumbnails)
+            {
+                if (thumb.BaseThumbnail == null)
+                    continue;
+
+                bool hasMatch = false;
+
+                if (this._highlightIndexBySchematic.TryGetValue(thumb.Name, out var thumbIndex) &&
+                    this._schematicByName.TryGetValue(thumb.Name, out var thumbSchematic))
+                {
+                    hasMatch = true;
+                    var highlighted = CreateHighlightedThumbnail(thumb.BaseThumbnail, thumb.OriginalPixelSize, thumbIndex, thumbSchematic, blinkFactor);
+                    var old = thumb.ImageSource;
+                    thumb.ImageSource = highlighted;
+                    if (!ReferenceEquals(old, thumb.BaseThumbnail))
+                        (old as IDisposable)?.Dispose();
+                }
+                else
+                {
+                    if (!ReferenceEquals(thumb.ImageSource, thumb.BaseThumbnail))
+                    {
+                        var old = thumb.ImageSource;
+                        thumb.ImageSource = thumb.BaseThumbnail;
+                        (old as IDisposable)?.Dispose();
+                    }
+                }
+
+                bool isRelevantForDimming = !hasSelection || hasMatch;
+                thumb.VisualOpacity = isRelevantForDimming ? 1.0 : 0.35;
+                thumb.IsMatchForSelection = hasSelection && hasMatch;
+            }
+        }
+
+        // ###########################################################################################
+        // Starts or stops the blink timer depending on current checkbox state and selection state.
+        // ###########################################################################################
+        private void UpdateBlinkTimer(bool hasSelection)
+        {
+            bool shouldBlink = this._blinkSelectedEnabled && hasSelection;
+
+            if (!shouldBlink)
+            {
+                this._blinkSelectedTimer?.Stop();
+                this._blinkSelectedPhaseVisible = true;
+                return;
+            }
+
+            if (this._blinkSelectedTimer == null)
+            {
+                this._blinkSelectedTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(450)
+                };
+                this._blinkSelectedTimer.Tick += this.OnBlinkSelectedTimerTick;
+            }
+
+            if (!this._blinkSelectedTimer.IsEnabled)
+                this._blinkSelectedTimer.Start();
+        }
+
+        // ###########################################################################################
+        // Advances blink phase and re-applies highlight visuals while selection exists.
+        // ###########################################################################################
+        private void OnBlinkSelectedTimerTick(object? sender, EventArgs e)
+        {
+            bool hasSelection = this._highlightIndexBySchematic.Count > 0;
+            if (!hasSelection)
+            {
+                this.UpdateBlinkTimer(false);
+                this.ApplyHighlightVisuals(false);
+                return;
+            }
+
+            this._blinkSelectedPhaseVisible = !this._blinkSelectedPhaseVisible;
+            this.ApplyHighlightVisuals(true);
+        }
+
+        // ###########################################################################################
+        // Computes effective blink multiplier for current frame.
+        // ###########################################################################################
+        private double GetCurrentBlinkFactor(bool hasSelection)
+        {
+            if (!hasSelection || !this._blinkSelectedEnabled)
+                return 1.0;
+
+            return this._blinkSelectedPhaseVisible ? 1.0 : 0.0;
+        }
 
     }
 }

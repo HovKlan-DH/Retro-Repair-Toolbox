@@ -7,11 +7,11 @@
         CanResize="False"
         ShowInTaskbar="False"
         Topmost="True"
-        Background="Transparent"
+        Background="{DynamicResource AppThemeSplashWindowBackgroundBrush}"
         TransparencyLevelHint="Transparent">
 
     <Border Background="{DynamicResource AppThemeBackgroundBrush}"
-            BorderBrush="Black"
+            BorderBrush="{DynamicResource AppThemeSplashBorderBrush}"
             BorderThickness="1"
             CornerRadius="4"
             ClipToBounds="True">

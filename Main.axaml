@@ -79,45 +79,36 @@
         <ColumnDefinition Width="*" MinWidth="100" />
     </Grid.ColumnDefinitions>
 
-    <!-- Left Panel -->
     <Border x:Name="LeftPanel"
-            Grid.Column="0"
-            BorderBrush="{DynamicResource AppThemePanelBorderBrush}"
-            BorderThickness="1"
-            Padding="16">
-        <Grid>
+        Grid.Column="0"
+        BorderBrush="{DynamicResource AppThemePanelBorderBrush}"
+        BorderThickness="1"
+        Padding="16">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Hardware, Board and Category selectors -->
+        <Grid Grid.Row="1"
+              Margin="0,8,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Size label -->
-            <TextBlock x:Name="LeftSizeLabel"
-                       Grid.Row="0"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Top"
+            <TextBlock Grid.Row="0"
+                       Text="Hardware"
                        FontSize="11"
                        Foreground="{DynamicResource AppThemeSecondaryTextBrush}" />
-
-            <!-- Hardware, Board and Category selectors -->
-            <Grid Grid.Row="1"
-                  Margin="0,8,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
-                           Text="Hardware"
-                           FontSize="11"
-                           Foreground="{DynamicResource AppThemeSecondaryTextBrush}" />
                 <ComboBox Grid.Row="1"
                           x:Name="HardwareComboBox"
                           HorizontalAlignment="Stretch"
@@ -279,11 +270,13 @@
                             FontSize="12"
                             Padding="4" />
 
-                    <CheckBox Grid.Column="2"
-                              Content="Blink selected"
-                              HorizontalAlignment="Left"
-                              FontSize="12"
-                              VerticalAlignment="Center" />
+                    <CheckBox x:Name="BlinkSelectedCheckBox"
+                          Grid.Column="2"
+                          Content="Blink selected"
+                          HorizontalAlignment="Left"
+                          FontSize="12"
+                          VerticalAlignment="Center"
+                          IsCheckedChanged="OnBlinkSelectedChanged" />
                 </Grid>
             </StackPanel>
 
@@ -432,7 +425,7 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
                                         Margin="10,10,0,0"
-                                        Background="{DynamicResource AppThemeThumbLabelBackgroundBrush}"
+                                        Background="{DynamicResource ComponentThumbnail_Bg}"
                                         BorderBrush="{DynamicResource AppThemeBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="4"
@@ -474,13 +467,21 @@
                                 </Style>
 
                                 <Style Selector="ListBoxItem Border.ThumbnailBorder">
-                                    <Setter Property="BorderBrush"     Value="{DynamicResource AppThemeThumbBorderSolidBrush}" />
-                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter 
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource Thumbnail_Border}" />
+                                    <Setter 
+                                        Property="BorderThickness" 
+                                        Value="1" />
                                 </Style>
 
                                 <Style Selector="ListBoxItem:selected Border.ThumbnailBorder">
-                                    <Setter Property="BorderBrush"     Value="{DynamicResource AppThemeThumbSelectedBorderBrush}" />
-                                    <Setter Property="BorderThickness" Value="3" />
+                                    <Setter 
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource Thumbnail_BorderSelected}" />
+                                    <Setter 
+                                        Property="BorderThickness" 
+                                        Value="3" />
                                 </Style>
 
                             </ListBox.Styles>
@@ -498,23 +499,35 @@
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
 
-                                            <Border Grid.Row="0"
-                                                    Background="{DynamicResource AppThemeThumbLabelBackgroundBrush}"
-                                                    BorderBrush="{DynamicResource AppThemeThumbBorderSolidBrush}"
+                                                <Border Grid.Row="0"
+                                                    Background="{DynamicResource Thumbnail_Bg}"
+                                                    BorderBrush="{DynamicResource Thumbnail_Border}"
                                                     BorderThickness="0,0,0,1">
-                                                <Grid>
-                                                    <Border Background="{DynamicResource AppThemeThumbMatchLabelOverlayBrush}"
-                                                        Opacity="0.45"
-                                                        IsVisible="{Binding IsMatchForSelection}" />
+                                                     <Grid>
+                                                        <!-- The matched background overlay -->
+                                                        <Border Background="{DynamicResource Thumbnail_Selection_Bg}"
+                                                                    Opacity="1.0"
+                                                                    IsVisible="{Binding IsMatchForSelection}" />
 
-                                                    <TextBlock Text="{Binding Name}"
-                                                               Foreground="{DynamicResource AppThemeTextBrush}"
-                                                               HorizontalAlignment="Stretch"
-                                                               TextAlignment="Left"
-                                                               FontSize="11"
-                                                               Padding="4,3" />
-                                                </Grid>
-                                            </Border>
+                                                                <!-- The DEFAULT text (visible when NOT matched) -->
+                                                                <TextBlock Text="{Binding Name}"
+                                                                           Foreground="{DynamicResource Thumbnail_Txt}"
+                                                                           HorizontalAlignment="Stretch"
+                                                                           TextAlignment="Left"
+                                                                           FontSize="11"
+                                                                           Padding="4,3"
+                                                                           IsVisible="{Binding !IsMatchForSelection}" />
+
+                                                                <!-- The MATCHED text (visible when matched) -->
+                                                                <TextBlock Text="{Binding Name}"
+                                                                           Foreground="{DynamicResource Thumbnail_Selection_Txt}"
+                                                                           HorizontalAlignment="Stretch"
+                                                                           TextAlignment="Left"
+                                                                           FontSize="11"
+                                                                           Padding="4,3"
+                                                                           IsVisible="{Binding IsMatchForSelection}" />
+                                                        </Grid>
+                                                    </Border>
 
                                             <Image Grid.Row="1"
                                                    Source="{Binding ImageSource}"
@@ -534,22 +547,6 @@
                     <StackPanel Spacing="16"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-
-                        <TextBlock x:Name="RightSizeLabel"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Top"
-                           FontSize="11"
-                           Foreground="{DynamicResource AppThemeSecondaryTextBrush}" />
-
-                        <Button x:Name="MyButton"
-                                Content="Click me!"
-                                Click="OnMyButtonClick"
-                                Background="{DynamicResource AppThemeListSelectionBrush}" />
-                        <TextBlock x:Name="StatusText"
-                                   Text="Waiting for click..."
-                                   Background="{DynamicResource AppThemeStatusBackgroundBrush}"
-                                   Foreground="{DynamicResource AppThemeStatusTextBrush}"
-                                   HorizontalAlignment="Center" />
                     </StackPanel>
                 </TabItem>
 

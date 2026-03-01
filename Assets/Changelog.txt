@@ -1,8 +1,10 @@
 The DEVELOPMENT version will most likely keep running on 0.1.x until final release.
 
 
-# 0.1.3, 2026-March-?
+# 0.1.3, 2026-March-1
 ---------------------
+* Fixed highlighting in schematic image was bound to "PAL" region only
+* Added functionality for blink button
 * Changed right-click in schematic will toggle component selection
 * Changed schematic thumbnails will dimm thumbnails without selected components
 
