@@ -1,11 +1,11 @@
-# Retro Repair Toolbox
+# Classic Repair Toolbox
 
-_Retro Repair Toolbox_ (or **RRT** hence forward) is a utility tool for repairing and diagnosing vintage computers and peripherals.
+_Classic Repair Toolbox_ (or **CRT** hence forward) is a utility tool for repairing and diagnosing vintage computers and peripherals.
 
 > [!CAUTION]
 > Please note that this is currently in active DEVELOPMENT, and not all functionalities are working.
 
-The project is a direct spin-off from my other project, [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox) (**CRT**) and once the development finalizes for **RRT**, then the **CRT** project will get archived on GitHub and this new project will take over.
+The project is a direct spin-off from my other project, [Commodore Repair Toolbox](https://github.com/HovKlan-DH/Commodore-Repair-Toolbox) and once the development finalizes, then the _Commodore Repair Toolbox_ project will get archived on GitHub and this new project will take over.
 
 ## Requirements
 
