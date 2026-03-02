@@ -16,7 +16,6 @@ env:
   EXE_WINDOWS: Classic-Repair-Toolbox.exe
   EXE_UNIX: Classic-Repair-Toolbox
   PROJECT: Classic-Repair-Toolbox.csproj
-  DATA_PACK_URL: https://classic-repair-toolbox.dk/app-data/Data.zip
 
 jobs:
 
@@ -62,11 +61,10 @@ jobs:
             --alg SHA-256 `
             publish/windows-x64/${{ env.EXE_WINDOWS }}
 
-      - name: Download and extract data pack
+      - name: Copy data pack
         shell: powershell
         run: |
-          Invoke-WebRequest "${{ env.DATA_PACK_URL }}" -OutFile data-pack.zip
-          Expand-Archive data-pack.zip -DestinationPath publish/windows-x64/Data/
+          Copy-Item -Path "Assets/Data" -Destination "publish/windows-x64" -Recurse
 
       - name: Install vpk
         shell: powershell
@@ -136,10 +134,9 @@ jobs:
             -p:Version=${{ steps.ver.outputs.version }} \
             -o publish/linux-x64
 
-      - name: Download and extract data pack
+      - name: Copy data pack
         run: |
-          curl -fsSL "${{ env.DATA_PACK_URL }}" -o data-pack.zip
-          unzip data-pack.zip -d publish/linux-x64/Data/
+          cp -r Assets/Data publish/linux-x64/
 
       - name: Install vpk
         run: dotnet tool install -g vpk
@@ -202,11 +199,10 @@ jobs:
             -p:Version=${{ steps.ver.outputs.version }} \
             -o publish/macos-x64
 
-      - name: Download and extract data pack
+      - name: Copy data pack
         run: |
-          curl -fsSL "${{ env.DATA_PACK_URL }}" -o data-pack.zip
-          unzip data-pack.zip -d publish/macos-arm64/Data/
-          unzip data-pack.zip -d publish/macos-x64/Data/
+          cp -r Assets/Data publish/macos-arm64/
+          cp -r Assets/Data publish/macos-x64/
 
       - name: Install vpk
         run: dotnet tool install -g vpk
