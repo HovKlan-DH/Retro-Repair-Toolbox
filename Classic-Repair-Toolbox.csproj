@@ -7,7 +7,7 @@
 		<Authors>Dennis Helligsoe</Authors>
 		<Copyright>©2025-2026</Copyright>
 		<AssemblyName>Classic-Repair-Toolbox</AssemblyName>
-		<AssemblyVersion>0.1.3</AssemblyVersion>
+		<AssemblyVersion>0.1.4</AssemblyVersion>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
@@ -51,9 +51,14 @@
     </Compile>
   </ItemGroup>
 
+<!--
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
  </ItemGroup>
+ -->
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\CRT_icon.png" />
+	</ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\CRT_icon.ico" />
